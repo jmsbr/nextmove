@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Cobrança - Motoristas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configurações básicas de estilo para todo o corpo da página */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a1a2e; /* Cor de fundo escura */
+            color: #e0e0e0; /* Cor do texto padrão */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Garante que ocupe a altura total da viewport */
+            overflow-x: hidden; /* Previne barras de rolagem horizontais */
+            /* REMOVED: transform: scale(0.67); and related properties */
+        }
+
+        /* Estilo para o cabeçalho do dashboard */
+        .header {
+            background-color: #0f3460; /* Cor de fundo para o cabeçalho */
+            color: #fff; /* Cor do texto do cabeçalho */
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Permite que os itens do cabeçalho quebrem linha */
+        }
+        .header h1 {
+            font-size: 1.75rem; /* Tamanho do título principal */
+            font-weight: 600;
+            margin-bottom: 0.5rem; /* Espaçamento abaixo do título em telas pequenas */
+        }
+        .header .date-time {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        /* Estilo para o contêiner das abas */
+        .tabs-container {
+            padding: 1rem;
+            background-color: #0f3460;
+            border-radius: 0.75rem;
+            margin: 1.5rem; /* Corresponde ao padding do dashboard-main-grid */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: calc(100vw - 3rem); /* Added this for better fit on small screens */
+            overflow-x: auto; /* Allow scrolling for tabs if they overflow */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        .tab-button {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            background-color: #2a3b5c;
+            color: #e0e0e0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            border: none;
+            outline: none;
+            white-space: nowrap; /* Evita que o texto do botão quebre linha */
+        }
+        .tab-button:hover {
+            background-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+        .tab-button.active-tab {
+            background-color: #3b82f6;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Contêiner principal do dashboard, que usará grid para as colunas */
+        .dashboard-main-grid {
+            flex-grow: 1;
+            display: grid;
+            gap: 1.5rem; /* Espaçamento entre os cartões */
+            padding: 1.5rem;
+            grid-template-columns: 1fr; /* Uma coluna por padrão para mobile */
+            overflow-y: auto; /* Permite rolagem interna em casos extremos */
+        }
+
+        /* Estilo para os cartões de informação */
+        .card {
+            background-color: #1f2a40; /* Cor de fundo para os cartões */
+            border-radius: 0.75rem; /* Bordas arredondadas */
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra suave */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Garante que o conteúdo não vaze */
+        }
+
+        /* Títulos dos cartões */
+        .card-title {
+            font-size: 1.25rem; /* Tamanho do título do cartão */
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #fff; /* Cor branca para os títulos */
+        }
+
+        /* Estilo para os cards de resumo internos (Ex: Total Pedidos, Pendentes) */
+        .summary-box {
+            background-color: #2a3b5c; /* Cor de fundo para os boxes de resumo */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            gap: 0.5rem;
+        }
+        .summary-box .value {
+            font-size: 1.875rem; /* Tamanho do valor */
+            font-weight: 700;
+        }
+        .summary-box .label {
+            font-size: 0.875rem; /* Tamanho do rótulo */
+            opacity: 0.8;
+        }
+
+        /* Estilo para tabelas internas */
+        .inner-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.5rem; /* Espaçamento entre as linhas */
+            margin-top: 1rem;
+        }
+        .inner-table th, .inner-table td {
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .inner-table th {
+            background-color: #0f3460;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #fff;
+            text-transform: uppercase;
+        }
+        .inner-table td {
+            background-color: #16213e; /* Fundo para as células de dados */
+            border-radius: 0.25rem;
+        }
+        .inner-table tbody tr:last-child td {
+            border-bottom: none; /* Remove borda da última linha */
+        }
+        .inner-table td:first-child {
+            border-top-left-radius: 0.25rem;
+            border-bottom-left-radius: 0.25rem;
+        }
+        .inner-table td:last-child {
+            border-top-right-radius: 0.25rem;
+            border-bottom-right-radius: 0.25rem;
+        }
+        .inner-table .status-perfect { color: #34d399; } /* Verde para PERFEITO */
+        .inner-table .status-excellent { color: #3b82f6; } /* Azul para EXCELENTE */
+        .inner-table .status-good { color: #facc15; } /* Amarelo para BOM */
+        .inner-table .status-critical { color: #ef4444; } /* Vermelho para CRÍTICO */
+
+        /* Estilo para listas dentro dos cards */
+        .styled-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .styled-list li {
+            background-color: #16213e;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+        .styled-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Estilos do Gráfico Circular */
+        .circular-chart-container {
+            position: relative;
+            width: 128px; /* w-32 */
+            height: 128px; /* h-32 */
+            margin: 0 auto 1rem auto; /* Centraliza e adiciona margem inferior */
+        }
+        .circular-chart {
+            display: block;
+            margin: 10px auto;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .circle-bg {
+            fill: none;
+            stroke: #4a5568; /* Tailwind gray-600 */
+            stroke-width: 3.8;
+        }
+        .circle {
+            fill: none;
+            stroke-width: 3.8;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dasharray 0.8s ease-in-out;
+            stroke: #34d399; /* Cor principal para o círculo de progresso */
+        }
+        .percentage-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 700; /* font-bold */
+            color: #e0e0e0;
+        }
+
+        /* Estilos das Barras de Progresso Horizontais Individuais */
+        .individual-performance-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 0.5rem;
+            flex-grow: 1; /* Permite que a lista cresça */
+        }
+        .individual-performance-list li {
+            background-color: #16213e;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .individual-performance-list li:last-child {
+            margin-bottom: 0;
+        }
+        .driver-name-percent {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .horizontal-progress-bar-container {
+            background-color: #4a5568; /* Fundo para a barra */
+            border-radius: 9999px; /* Totalmente arredondado */
+            height: 0.5rem; /* Altura da barra */
+            overflow: hidden;
+            width: 100%;
+        }
+        .horizontal-progress-bar {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease-in-out;
+        }
+        /* Cores para as barras horizontais com base no status */
+        .horizontal-progress-bar.bg-perfect { background-color: #34d399; }
+        .horizontal-progress-bar.bg-excellent { background-color: #3b82f6; }
+        .horizontal-progress-bar.bg-good { background-color: #facc15; }
+        .horizontal-progress-bar.bg-critical { background-color: #ef4444; }
+
+
+        /* Cores para os ícones */
+        .icon-red { color: #ef4444; }
+        .icon-green { color: #34d399; }
+        .icon-blue { color: #3b82f6; } /* Adicionado para EXCELENTE */
+        .icon-yellow { color: #facc15; } /* Adicionado para BOM */
+        .icon-purple { color: #a78bfa; } /* Adicionado para Ranking Completo */
+
+
+        /* Responsividade para telas maiores */
+        @media (min-width: 768px) {
+            .dashboard-main-grid {
+                grid-template-columns: 1fr 1fr; /* Duas colunas em tablets */
+                overflow-y: hidden; /* Desativa rolagem vertical em telas maiores */
+            }
+            .header h1 {
+                margin-bottom: 0;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard-main-grid {
+                grid-template-columns: 1fr 1fr 1fr; /* Três colunas em desktops */
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="header">
+        <h1>Dashboard de Cobrança para Motoristas</h1>
+        <div class="date-time" id="datetime"></div>
+    </div>
+
+    <div class="tabs-container flex flex-wrap justify-center gap-2">
+        <button class="tab-button active-tab" data-tab="Geral">Geral</button>
+        <button class="tab-button" data-tab="APG -GO">APG -GO</button>
+        <button class="tab-button" data-tab="CAN -GO">CAN -GO</button>
+        <button class="tab-button" data-tab="CTL -GO">CTL -GO</button>
+        <button class="tab-button" data-tab="CTN -GO">CTN -GO</button>
+        <button class="tab-button" data-tab="PON -GO">PON -GO</button>
+        <button class="tab-button" data-tab="TRD -GO">TRD -GO</button>
+        <button class="tab-button" data-tab="GYN 02-GO">GYN 02-GO</button>
+        <button class="tab-button" data-tab="GYN 03-GO">GYN 03-GO</button>
+        <button class="tab-button" data-tab="GYN 04-GO">GYN 04-GO</button>
+        <button class="tab-button" data-tab="GYN 05-GO">GYN 05-GO</button>
+        <button class="tab-button" data-tab="GYN 06-GO">GYN 06-GO</button>
+        <button class="tab-button" data-tab="GYN 07-GO">GYN 07-GO</button>
+        <button class="tab-button" data-tab="ITR -GO">ITR -GO</button>
+        <button class="tab-button" data-tab="JTI -GO">JTI -GO</button>
+        <button class="tab-button" data-tab="QUI -GO">QUI -GO</button>
+        <button class="tab-button" data-tab="RVD -GO">RVD -GO</button>
+        <button class="tab-button" data-tab="SEN-GO">SEN-GO</button>
+        <button class="tab-button" data-tab="ANP -GO">ANP -GO</button>
+        <button class="tab-button" data-tab="GNA -GO">GNA -GO</button>
+        <button class="tab-button" data-tab="IPR -GO">IPR -GO</button>
+        <button class="tab-button" data-tab="PRG -GO">PRG -GO</button>
+        <button class="tab-button" data-tab="SMA -GO">SMA -GO</button>
+        <button class="tab-button" data-tab="SMB -GO">SMB -GO</button>
+        <button class="tab-button" data-tab="URC -GO">URC -GO</button>
+    </div>
+
+    <div class="dashboard-main-grid">
+        <div class="card col-span-1">
+            <h2 class="card-title text-red-400"><i class="fas fa-exclamation-triangle mr-2"></i>Alertas de Pendências</h2>
+
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                <div class="summary-box bg-red-800 text-red-100">
+                    <div class="label">Total Pedidos</div>
+                    <div class="value" id="total-pedidos-geral-card1"></div>
+                </div>
+                <div class="summary-box bg-yellow-800 text-yellow-100">
+                    <div class="label">Pendentes</div>
+                    <div class="value" id="total-pedidos-aberto-card1"></div>
+                </div>
+                <div class="summary-box bg-green-800 text-green-100">
+                    <div class="label">% Concluído</div>
+                    <div class="value" id="total-porcentagem-concluido-card1"></div>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-semibold mb-2 mt-4"><i class="fas fa-arrow-up mr-2 text-red-500"></i>Maior Quantidade de Pendências</h3>
+            <ul class="styled-list mb-4" id="maior-quantidade-pendencias">
+                </ul>
+
+            <h3 class="text-lg font-semibold mb-2 mt-4"><i class="fas fa-info-circle mr-2 text-blue-400"></i>Detalhes dos Pedidos Pendentes</h3>
+            <div class="overflow-x-auto">
+                <table class="inner-table">
+                    <thead>
+                        <tr>
+                            <th>Motorista</th>
+                            <th>Pendentes</th>
+                            <th>% Entregas</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="details-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card col-span-1">
+            <h2 class="card-title text-blue-400"><i class="fas fa-chart-bar mr-2"></i>Desempenho Detalhado</h2>
+
+            <div class="flex flex-col items-center mb-6">
+                <h3 class="text-lg font-semibold mb-2">Performance Geral de Entregas</h3>
+                <div class="circular-chart-container relative">
+                    <svg class="circular-chart" viewBox="0 0 36 36">
+                        <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                        <path class="circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                    </svg>
+                    <div class="percentage-text absolute inset-0 flex items-center justify-center" id="overall-percentage-text"></div>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-semibold mb-2 mt-4">Desempenho Individual de Entregas</h3>
+            <ul class="individual-performance-list" id="individual-performance-list">
+                </ul>
+
+            <div class="grid grid-cols-3 gap-2 mt-auto pt-4 border-t border-gray-700">
+                <div class="summary-box bg-gray-700 text-gray-100">
+                    <div class="label">Total Pedidos</div>
+                    <div class="value" id="total-pedidos-geral-card2"></div>
+                </div>
+                <div class="summary-box bg-gray-700 text-gray-100">
+                    <div class="label">Concluídos</div>
+                    <div class="value" id="total-pedidos-concluidos-card2"></div>
+                </div>
+                <div class="summary-box bg-gray-700 text-gray-100">
+                    <div class="label">% Pendentes</div>
+                    <div class="value" id="total-porcentagem-pendentes-card2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card col-span-1">
+            <h2 class="card-title text-green-400"><i class="fas fa-medal mr-2"></i>Melhores Desempenhos</h2>
+
+            <h3 class="text-lg font-semibold mb-2 mt-4"><i class="fas fa-trophy mr-2 text-yellow-400"></i>Top Performers</h3>
+            <ul class="styled-list mb-4" id="top-performers">
+                </ul>
+
+            <h3 class="text-lg font-semibold mb-2 mt-4"><i class="fas fa-list-ol mr-2 icon-purple"></i>Ranking Completo</h3>
+            <div class="overflow-x-auto">
+                <table class="inner-table">
+                    <thead>
+                        <tr>
+                            <th>Motorista</th>
+                            <th>Pendentes</th>
+                            <th>% Entregas</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="pedidos.js"></script> 
+    <script>
+        // Variáveis globais para os dados da aba atualmente selecionada
+        let currentDriverData = [];
+        let currentTotalPedidosEmAberto = 0;
+        let currentTotalPedidosGeral = 0;
+        let currentTotalPorcentagemEntregas = 0;
+
+        /**
+         * Calcula a porcentagem de entregas para cada motorista e preenche os dados gerais.
+         * Assumes `allDashboardData` is globally available from pedidos.js
+         */
+        function initializeDashboardData() {
+            let generalTotalPending = 0;
+            let generalTotalDelivered = 0;
+            let allDrivers = [];
+
+            for (const baseKey in allDashboardData) {
+                if (baseKey !== "Geral") {
+                    // Calculate and ensure numbers are handled correctly (e.g., from empty strings to 0)
+                    allDashboardData[baseKey].drivers.forEach(driver => {
+                        const delivered = Number(driver.delivered) || 0;
+                        const pending = Number(driver.pending) || 0;
+                        const total = delivered + pending;
+                        driver.delivered = delivered; // Store as number
+                        driver.pending = pending;     // Store as number
+                        driver.total = total;         // Store total for consistency
+                        driver.deliveries = total === 0 ? 0 : (delivered / total) * 100;
+                    });
+
+                    // Aggregate totals for the "Geral" tab, converting to numbers
+                    generalTotalPending += (Number(allDashboardData[baseKey].totalPending) || 0);
+                    generalTotalDelivered += (Number(allDashboardData[baseKey].totalDelivered) || 0);
+                    allDrivers = allDrivers.concat(allDashboardData[baseKey].drivers);
+                }
+            }
+
+            // Fill "Geral" tab data, converting to numbers
+            allDashboardData.Geral.totalPending = generalTotalPending;
+            allDashboardData.Geral.totalDelivered = generalTotalDelivered;
+            allDashboardData.Geral.totalOverall = generalTotalPending + generalTotalDelivered;
+            allDashboardData.Geral.drivers = allDrivers;
+            allDashboardData.Geral.totalPorcentagemEntregas =
+                allDashboardData.Geral.totalOverall === 0
+                    ? 0
+                    : (allDashboardData.Geral.totalDelivered / allDashboardData.Geral.totalOverall) * 100;
+        }
+
+        /**
+         * Determina o status, classe CSS e cor de fundo com base na porcentagem de entregas.
+         * @param {number} percentage - A porcentagem de entregas.
+         * @returns {{text: string, class: string, bgColor: string}} Um objeto contendo o texto do status, a classe CSS e a cor de fundo.
+         */
+        function getStatus(percentage) {
+            if (percentage === 100) return { text: "PERFEITO", class: "status-perfect", bgColor: "bg-perfect" };
+            if (percentage >= 70) return { text: "EXCELENTE", class: "status-excellent", bgColor: "bg-excellent" };
+            if (percentage >= 40) return { text: "BOM", class: "status-good", bgColor: "bg-good" };
+            return { text: "CRÍTICO", class: "status-critical", bgColor: "bg-critical" };
+        }
+
+        /**
+         * Popula as tabelas "Detalhes dos Pedidos Pendentes" e "Ranking Completo" com os dados da aba atual.
+         */
+        function populateTables() {
+            const detailsTableBody = document.getElementById('details-table-body');
+            const rankingTableBody = document.getElementById('ranking-table-body');
+
+            // Limpa o conteúdo existente
+            detailsTableBody.innerHTML = '';
+            rankingTableBody.innerHTML = '';
+
+            // For "Detalhes dos Pedidos Pendentes": Sort by 'pending' in descending order
+            const sortedDetailsData = [...currentDriverData].sort((a, b) => b.pending - a.pending); // Sort by pending (desc)
+
+            sortedDetailsData.forEach(driver => {
+                const status = getStatus(driver.deliveries);
+                const row = `
+                    <tr>
+                        <td>${driver.name}</td>
+                        <td>${driver.pending}</td>
+                        <td>${driver.deliveries.toFixed(2)}%</td>
+                        <td class="${status.class}">${status.text}</td>
+                    </tr>
+                `;
+                detailsTableBody.innerHTML += row;
+            });
+
+            // For "Ranking Completo": Sort by '% Entregas' (deliveries) descending, then 'Pendentes' ascending
+            const sortedRankingData = [...currentDriverData].sort((a, b) => {
+                if (b.deliveries !== a.deliveries) {
+                    return b.deliveries - a.deliveries; // Maior % de entregas primeiro
+                }
+                return a.pending - b.pending; // Menor pendentes se % igual
+            });
+
+            sortedRankingData.forEach(driver => {
+                const status = getStatus(driver.deliveries);
+                const row = `
+                    <tr>
+                        <td>${driver.name}</td>
+                        <td>${driver.pending}</td>
+                        <td>${driver.deliveries.toFixed(2)}%</td>
+                        <td class="${status.class}">${status.text}</td>
+                    </tr>
+                `;
+                rankingTableBody.innerHTML += row;
+            });
+        }
+
+        /**
+         * Popula o gráfico circular, as barras de progresso horizontais individuais,
+         * a lista "Maior Quantidade de Pendências" e a lista "Top Performers" com os dados da aba atual.
+         */
+        function populateDetailedPerformance() {
+            // Gráfico Circular (Performance Geral)
+            const circle = document.querySelector('.circular-chart .circle');
+            const overallPercentageText = document.getElementById('overall-percentage-text');
+            if (circle && overallPercentageText) {
+                const circumference = 2 * Math.PI * 15.9155; // 2 * PI * raio (raio do path SVG)
+                const offset = circumference - (currentTotalPorcentagemEntregas / 100) * circumference;
+                circle.style.strokeDasharray = `${currentTotalPorcentagemEntregas}, 100`; // Porcentagem, e o restante
+                circle.style.strokeDashoffset = offset; // Offset para preenchimento
+                overallPercentageText.textContent = `${currentTotalPorcentagemEntregas.toFixed(2)}%`;
+            }
+
+            // Desempenho Individual do Motorista (Barras Horizontais)
+            const individualPerformanceList = document.getElementById('individual-performance-list');
+            if (individualPerformanceList) {
+                individualPerformanceList.innerHTML = ''; // Limpa as barras existentes
+
+                // Ordena por porcentagem de entregas decrescente para melhor visualização
+                const sortedDrivers = [...currentDriverData].sort((a, b) => b.deliveries - a.deliveries);
+
+                sortedDrivers.forEach(driver => {
+                    const status = getStatus(driver.deliveries);
+                    // Extrai o nome do motorista, tratando casos como "TIPO - NOME"
+                    const driverDisplayName = driver.name.includes(' - ') ? driver.name.split(' - ')[1] : driver.name;
+                    const listItem = `
+                        <li>
+                            <div class="driver-name-percent">
+                                <span>${driverDisplayName}</span>
+                                <span class="${status.class}">${driver.deliveries.toFixed(2)}%</span>
+                            </div>
+                            <div class="horizontal-progress-bar-container">
+                                <div class="horizontal-progress-bar ${status.bgColor}" style="width: ${driver.deliveries.toFixed(2)}%;"></div>
+                            </div>
+                        </li>
+                    `;
+                    individualPerformanceList.innerHTML += listItem;
+                });
+            }
+
+            // Top Performers (Card 3)
+            const topPerformersList = document.getElementById('top-performers');
+            if (topPerformersList) {
+                topPerformersList.innerHTML = '';
+                const sortedTopPerformers = [...currentDriverData]
+                    .filter(driver => driver.delivered > 0) // Filtra para incluir apenas quem tem entregas
+                    .sort((a, b) => b.deliveries - a.deliveries)
+                    .slice(0, 4); // Pega os 4 melhores
+
+                sortedTopPerformers.forEach(driver => {
+                    const status = getStatus(driver.deliveries);
+                    const driverDisplayName = driver.name.includes(' - ') ? driver.name.split(' - ')[1] : driver.name;
+                    const listItem = `
+                        <li>
+                            <span>${driverDisplayName}</span>
+                            <span class="${status.class}">${status.class.includes('perfect') ? driver.deliveries.toFixed(0) : driver.deliveries.toFixed(2)}% <i class="fas fa-award ml-2 ${status.class.replace('status-', 'icon-')}"></i></span>
+                        </li>
+                    `;
+                    topPerformersList.innerHTML += listItem;
+                });
+            }
+
+            // "Maior Quantidade de Pendências" (Card 1)
+            const maiorQuantidadePendenciasList = document.getElementById('maior-quantidade-pendencias');
+            if (maiorQuantidadePendenciasList) {
+                maiorQuantidadePendenciasList.innerHTML = '';
+                const sortedPendingDrivers = [...currentDriverData].sort((a, b) => b.pending - a.pending).slice(0, 4); // Pega os 4 com mais pendências
+
+                sortedPendingDrivers.forEach(driver => {
+                    const listItem = `
+                        <li>
+                            <span>${driver.name}</span>
+                            <span class="text-red-300">${driver.pending} pedidos <i class="fas fa-exclamation-circle ml-2 icon-red"></i></span>
+                        </li>
+                    `;
+                    maiorQuantidadePendenciasList.innerHTML += listItem;
+                });
+            }
+
+            // Atualiza os valores totais nos cards de resumo
+            document.getElementById('total-pedidos-geral-card1').textContent = currentTotalPedidosGeral;
+            document.getElementById('total-pedidos-aberto-card1').textContent = currentTotalPedidosEmAberto;
+            document.getElementById('total-porcentagem-concluido-card1').textContent = `${currentTotalPorcentagemEntregas.toFixed(2)}%`;
+
+            // Atualiza os valores no card de "Desempenho Detalhado"
+            document.getElementById('total-pedidos-geral-card2').textContent = currentTotalPedidosGeral;
+            const totalConcluidos = currentTotalPedidosGeral - currentTotalPedidosEmAberto;
+            document.getElementById('total-pedidos-concluidos-card2').textContent = totalConcluidos;
+            const porcentagemPendentes = 100 - currentTotalPorcentagemEntregas;
+            document.getElementById('total-porcentagem-pendentes-card2').textContent = `${porcentagemPendentes.toFixed(2)}%`;
+        }
+
+        /**
+         * Atualiza a data e hora atual no cabeçalho.
+         */
+        function updateDateTime() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            const dateTimeString = now.toLocaleDateString('pt-BR', options);
+            document.getElementById('datetime').textContent = dateTimeString;
+        }
+
+        /**
+         * Ajusta o tamanho da fonte raiz com base na largura da viewport para melhor legibilidade em diferentes dispositivos.
+         * Esta função ainda é útil para ajustar o tamanho base dos elementos antes que o navegador lide com o zoom padrão.
+         */
+        function adjustFontSize() {
+            const viewportWidth = window.innerWidth;
+            const rootHtml = document.documentElement;
+
+            if (viewportWidth < 600) {
+                rootHtml.style.fontSize = '14px';
+            } else if (viewportWidth < 1024) {
+                rootHtml.style.fontSize = '15px';
+            } else {
+                rootHtml.style.fontSize = '16px';
+            }
+        }
+
+        /**
+         * Função para exibir a aba selecionada e atualizar os dados do dashboard.
+         * @param {string} tabName - O nome da aba a ser exibida (ex: "Geral", "ANP -GO").
+         */
+        function showTab(tabName) {
+            // Update 'active-tab' class on tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active-tab');
+            });
+            document.querySelector(`.tab-button[data-tab="${tabName}"]`).classList.add('active-tab');
+
+            // Get data for the selected tab
+            const dataForTab = allDashboardData[tabName];
+            currentDriverData = dataForTab.drivers;
+            currentTotalPedidosEmAberto = dataForTab.totalPending;
+            currentTotalPedidosGeral = dataForTab.totalOverall;
+            currentTotalPorcentagemEntregas = dataForTab.totalPorcentagemEntregas !== undefined
+                ? dataForTab.totalPorcentagemEntregas
+                : (dataForTab.totalOverall === 0 ? 0 : (dataForTab.totalDelivered / dataForTab.totalOverall) * 100);
+
+            // Repopulate the dashboard with the new data
+            populateTables();
+            populateDetailedPerformance();
+        }
+
+        // Initialize dashboard components when the window loads
+        window.onload = function() {
+            // Ensure allDashboardData is available before initializing
+            if (typeof allDashboardData !== 'undefined') {
+                initializeDashboardData();
+                updateDateTime();
+                setInterval(updateDateTime, 1000);
+                adjustFontSize(); // This will help set a base font size.
+
+                // Add event listeners for tab buttons
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        showTab(button.dataset.tab);
+                    });
+                });
+
+                // Display "Geral" tab by default on page load
+                showTab('Geral');
+            } else {
+                console.error("Error: allDashboardData is not defined. Make sure pedidos.js is loaded correctly.");
+            }
+        };
+
+        // Add a listener to adjust font when window is resized
+        window.addEventListener('resize', adjustFontSize);
+    </script>
+</body>
+</html>
