@@ -521,7 +521,14 @@
 
                 // Ação de Visualizar
                 if (button.classList.contains('view-btn')) {
-                    window.open(file.fileURL, '_blank');
+                    const pdfWindow = window.open("");
+                    pdfWindow.document.write(
+                        "<html><head><title>" + encodeURIComponent(file.fileName) + "</title></head><body>" +
+                        "<style>body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }</style>" +
+                        '<iframe width="100%" height="100%" src="' + file.fileURL + '"></iframe>' +
+                        "</body></html>"
+                    );
+                    pdfWindow.document.close();
                 }
                 // Ação de Baixar
                 else if (button.classList.contains('download-btn')) {
