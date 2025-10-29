@@ -12,14 +12,32 @@
             background-color: #f8fafc; /* bg-slate-50 */
             overflow-x: hidden; /* Previne barra horizontal no body */
         }
-        /* Estilos da barra de rolagem (opcional, para visualização vertical se necessário) */
+        /* Estilos da barra de rolagem */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+         /* Estilo para o spinner de carregamento inicial */
+        #initial-loading {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(248, 250, 252, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
     </style>
 </head>
 <body class="bg-slate-50">
+
+    <!-- Loading Inicial -->
+    <div id="initial-loading">
+        <svg class="animate-spin h-10 w-10 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    </div>
 
     <!-- Elemento de Notificação -->
     <div id="notification" class="hidden fixed top-5 right-5 z-50 p-4 rounded-md shadow-lg text-white transition-opacity duration-300 max-w-sm">
@@ -46,13 +64,13 @@
             </div>
             <div class="flex items-center space-x-4 md:space-x-6 mt-4 sm:mt-0">
                 <!-- Logo J&T Express -->
-                <img src="https://www.jtexpress.com.br/mobile/static/png/leader_1-c3f7a853.png" alt="Logo J&T Express" class="h-16 w-auto">
+                <img src="https://www.jtexpress.com.br/mobile/static/png/leader_1-c3f7a853.png" alt="Logo J&T Express" class="h-16 w-auto" onerror="this.style.display='none'">
                 <!-- Nova Logo J&T Express -->
-                <img src="https://yl-pufile.jtexpress.ph/osbforever/YL_JMS_OFFICIAL_MANAGE/INFORMATION/20241104/1730704731890-1092-OurServices001.png" alt="Nova Logo J&T Express" class="h-16 w-auto">
+                <img src="https://yl-pufile.jtexpress.ph/osbforever/YL_JMS_OFFICIAL_MANAGE/INFORMATION/20241104/1730704731890-1092-OurServices001.png" alt="Nova Logo J&T Express" class="h-16 w-auto" onerror="this.style.display='none'">
             </div>
         </header>
 
-        <!-- Grade de Status (Ajustada para 5 colunas no max) -->
+        <!-- Grade de Status -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
              <!-- Pendentes -->
             <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
@@ -88,7 +106,6 @@
                 </div>
                 <div><h3 class="text-sm font-semibold text-slate-500 uppercase">Vencidos</h3><p id="expired-count" class="text-3xl font-bold text-red-600 mt-1">0</p></div>
             </div>
-
             <!-- Extravio Motorista -->
             <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
                 <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center">
@@ -98,7 +115,6 @@
                 </div>
                 <div><h3 class="text-sm font-semibold text-slate-500 uppercase">Extravio Motorista</h3><p id="extravio-motorista-count" class="text-3xl font-bold text-orange-600 mt-1">0</p></div>
             </div>
-
             <!-- Extravio Base -->
             <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
                 <div class="bg-teal-100 rounded-full w-12 h-12 flex items-center justify-center">
@@ -108,7 +124,6 @@
                 </div>
                 <div><h3 class="text-sm font-semibold text-slate-500 uppercase">Extravio Base</h3><p id="extravio-base-count" class="text-3xl font-bold text-teal-600 mt-1">0</p></div>
             </div>
-
             <!-- Solucionados -->
             <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
                  <div class="bg-emerald-100 rounded-full w-12 h-12 flex items-center justify-center">
@@ -188,7 +203,7 @@
                     <thead class="bg-slate-50 text-xs text-slate-700 uppercase">
                         <tr>
                             <th scope="col" class="px-6 py-3">Nome do Arquivo</th>
-                            <th scope="col" class_Name="px-6 py-3">Pasta</th>
+                            <th scope="col" class="px-6 py-3">Pasta</th>
                             <th scope="col" class="px-6 py-3">Data de Envio</th>
                             <th scope="col" class="px-6 py-3">Status</th>
                             <th scope="col" class="px-6 py-3 text-center">Ações</th>
@@ -270,7 +285,11 @@
             // URL DO BANCO DE DADOS ONLINE - CONFIGURADO E PRONTO
             const DATABASE_URL = "https://api.npoint.io/ef789e8a4e2cd9900cf7";
             // -------------------------------------------------------------------------
-
+            
+            // --- Variáveis Globais ---
+            let AppState = { files: [], solvedCount: 0 }; // Estado local
+            let isSaving = false; // Flag para evitar conflitos
+            let autoUpdateInterval; // Referência para o intervalo
 
             // --- Verificação da URL ---
             if (!DATABASE_URL || DATABASE_URL === "COLE_SUA_URL_AQUI") {
@@ -284,13 +303,8 @@
                 return;
             }
 
-            // --- Estado da Aplicação ---
-            let AppState = {
-                files: [],
-                solvedCount: 0
-            };
-            
             // --- Elementos da UI ---
+            const loadingEl = document.getElementById('initial-loading');
             const form = document.getElementById('upload-form');
             const folderInput = document.getElementById('folder-name');
             const fileInput = document.getElementById('pdf-file-input');
@@ -301,7 +315,6 @@
             const pendingFileList = document.getElementById('file-list');
             const printedFileList = document.getElementById('printed-file-list');
             const expiredFileList = document.getElementById('expired-file-list');
-            // Novos elementos da lista
             const extravioMotoristaList = document.getElementById('extravio-motorista-list');
             const extravioBaseList = document.getElementById('extravio-base-list');
 
@@ -310,7 +323,6 @@
             const alertCountEl = document.getElementById('alert-count');
             const expiredCountEl = document.getElementById('expired-count');
             const solvedCountEl = document.getElementById('solved-count');
-            // IDs para novos contadores
             const extravioMotoristaCountEl = document.getElementById('extravio-motorista-count');
             const extravioBaseCountEl = document.getElementById('extravio-base-count');
 
@@ -361,67 +373,80 @@
             }
 
             // --- Funções de Dados (GET e PUT) ---
-            async function fetchData() {
+            
+            // Função centralizada para BUSCAR dados
+            async function getLatestData() {
                 try {
-                    const response = await fetch(DATABASE_URL);
+                    // Adiciona um parâmetro anti-cache para garantir dados frescos
+                    const response = await fetch(`${DATABASE_URL}?_=${new Date().getTime()}`);
                     if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                     const data = await response.json();
-                    AppState = data;
-                    render();
+                    // Garante que a estrutura básica exista
+                    if (!data.files) data.files = [];
+                    if (!data.solvedCount) data.solvedCount = 0;
+                    return data;
                 } catch (error) {
                     console.error("Erro ao buscar dados:", error);
                     showNotification("Não foi possível carregar os dados. Verifique sua conexão.", true);
+                    return null; // Retorna nulo em caso de erro
                 }
             }
             
-            async function saveData() {
+            // Função centralizada para SALVAR dados
+            async function saveData(dataToSave) {
+                if (isSaving) return; // Previne salvamentos múltiplos
+                isSaving = true;
+                clearInterval(autoUpdateInterval); // Pausa a atualização automática
+
                 try {
                     const response = await fetch(DATABASE_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(AppState)
+                        body: JSON.stringify(dataToSave)
                     });
                     if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                 } catch (error) {
                     console.error("Erro ao salvar dados:", error);
                     showNotification("Ocorreu um erro ao salvar as alterações.", true);
+                } finally {
+                    isSaving = false; // Libera o flag
+                    startAutoUpdate(); // Reinicia a atualização automática
                 }
             }
-
-
+            
             // --- Lógica de Renderização ---
-            function render() {
+            function render(data) {
                 const now = new Date().getTime();
-                let needsUpdate = false;
-                if (!AppState.files) AppState.files = []; 
-                AppState.files.forEach(file => {
-                    // *** CORREÇÃO DO BUG AQUI ***
-                    // Apenas 'pending' e 'impresso' podem se tornar 'expired'.
-                    // Não re-verificar 'extravio_motorista' ou 'extravio_base'.
+                let needsStatusUpdate = false;
+                
+                // Usa os dados passados para renderizar
+                if (!data) data = { files: [], solvedCount: 0 };
+                
+                // Lógica de verificação de status (vencidos)
+                data.files.forEach(file => {
                     if ((file.status === 'pending' || file.status === 'impresso') && now > file.deadline) {
                         file.status = 'expired';
-                        needsUpdate = true;
+                        needsStatusUpdate = true;
                     }
                 });
                 
+                // Limpa as listas
                 pendingFileList.innerHTML = '';
                 printedFileList.innerHTML = '';
                 expiredFileList.innerHTML = '';
-                // Limpa novas listas
                 extravioMotoristaList.innerHTML = '';
                 extravioBaseList.innerHTML = '';
 
-
                 let alertCount = 0;
 
-                const pendingFiles = AppState.files.filter(f => f.status === 'pending');
-                const printedFiles = AppState.files.filter(f => f.status === 'impresso');
-                const expiredFiles = AppState.files.filter(f => f.status === 'expired');
-                // Filtra novas listas
-                const extravioMotoristaFiles = AppState.files.filter(f => f.status === 'extravio_motorista');
-                const extravioBaseFiles = AppState.files.filter(f => f.status === 'extravio_base');
+                // Filtra os arquivos
+                const pendingFiles = data.files.filter(f => f.status === 'pending');
+                const printedFiles = data.files.filter(f => f.status === 'impresso');
+                const expiredFiles = data.files.filter(f => f.status === 'expired');
+                const extravioMotoristaFiles = data.files.filter(f => f.status === 'extravio_motorista');
+                const extravioBaseFiles = data.files.filter(f => f.status === 'extravio_base');
 
-
+                // Renderiza Tabela Pendentes
                 if (pendingFiles.length === 0) {
                     pendingFileList.innerHTML = `<tr id="empty-state-pending"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>`;
                 } else {
@@ -433,59 +458,69 @@
                             if (!file.alertNotified) {
                                 showNotification(`Atenção: O documento '${file.fileName}' está prestes a vencer!`);
                                 file.alertNotified = true;
-                                needsUpdate = true;
+                                needsStatusUpdate = true;
                             }
                         }
                         pendingFileList.insertAdjacentHTML('beforeend', createPendingRow(file, isAlerting));
                     });
                 }
 
+                // Renderiza Tabela Impressos
                 if (printedFiles.length === 0) {
                     printedFileList.innerHTML = `<tr id="empty-state-printed"><td colspan="4" class="text-center py-10 text-slate-500">Nenhum documento impresso.</td></tr>`;
                 } else {
                     printedFiles.sort((a, b) => a.deadline - b.deadline).forEach(file => printedFileList.insertAdjacentHTML('beforeend', createPrintedRow(file)));
                 }
 
+                // Renderiza Tabela Vencidos
                 if (expiredFiles.length === 0) {
                     expiredFileList.innerHTML = `<tr id="empty-state-expired"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento vencido.</td></tr>`;
                 } else {
                     expiredFiles.sort((a, b) => b.uploadDate - a.uploadDate).forEach(file => expiredFileList.insertAdjacentHTML('beforeend', createExpiredRow(file)));
                 }
 
-                // Renderiza novas listas
+                // Renderiza Tabela Extravio Motorista
                 if (extravioMotoristaFiles.length === 0) {
                     extravioMotoristaList.innerHTML = `<tr id="empty-state-extravio-motorista"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento em extravio motorista.</td></tr>`;
                 } else {
                     extravioMotoristaFiles.sort((a, b) => b.uploadDate - a.uploadDate).forEach(file => extravioMotoristaList.insertAdjacentHTML('beforeend', createExtravioMotoristaRow(file)));
                 }
 
+                // Renderiza Tabela Extravio Base
                 if (extravioBaseFiles.length === 0) {
                     extravioBaseList.innerHTML = `<tr id="empty-state-extravio-base"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento em extravio base.</td></tr>`;
                 } else {
                     extravioBaseFiles.sort((a, b) => b.uploadDate - a.uploadDate).forEach(file => extravioBaseList.insertAdjacentHTML('beforeend', createExtravioBaseRow(file)));
                 }
                 
+                // Atualiza contadores
                 pendingCountEl.textContent = pendingFiles.length;
                 printedCountEl.textContent = printedFiles.length;
                 alertCountEl.textContent = alertCount;
                 expiredCountEl.textContent = expiredFiles.length;
-                solvedCountEl.textContent = AppState.solvedCount || 0;
-                // Atualiza novos contadores
+                solvedCountEl.textContent = data.solvedCount || 0;
                 extravioMotoristaCountEl.textContent = extravioMotoristaFiles.length;
                 extravioBaseCountEl.textContent = extravioBaseFiles.length;
 
-                if(needsUpdate) {
-                    saveData();
+                // Salva automaticamente se o status de um arquivo mudou (ex: 'expired')
+                if (needsStatusUpdate) {
+                    AppState = data; // Atualiza o estado global
+                    saveData(AppState); 
+                }
+                
+                // Esconde o loading inicial
+                if (loadingEl) {
+                    loadingEl.style.display = 'none';
                 }
             }
 
-            // --- Funções de Criação de Linhas (com novos botões) ---
-
+            // --- Funções de Criação de Linhas ---
+            // (Colar aqui as 5 funções: createPendingRow, createPrintedRow, createExpiredRow, createExtravioMotoristaRow, createExtravioBaseRow)
+            // (Elas permanecem iguais à versão anterior, sem truncar o nome)
             function createPendingRow(file, isAlerting) {
                 const deadlineFormatted = new Date(file.deadline).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
                 const statusClass = isAlerting ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800';
                 const statusText = isAlerting ? 'Expirando' : 'Pendente';
-                // Correção: Removido 'truncate max-w-md' e adicionado 'whitespace-nowrap'. 'space-x-2' para botões.
                 return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
                             <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
@@ -516,7 +551,6 @@
             }
 
             function createPrintedRow(file) {
-                // Correção: Removido 'truncate max-w-md' e adicionado 'whitespace-nowrap'. 'space-x-2' para botões.
                 return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
                             <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
@@ -542,7 +576,6 @@
 
             function createExpiredRow(file) {
                   const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
-                  // Correção: Removido 'truncate max-w-md' e adicionado 'whitespace-nowrap'. 'space-x-2' para botões.
                   return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
                             <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
@@ -567,20 +600,14 @@
                             </div></td></tr>`;
             }
 
-            // --- Novas Funções de Linha ---
-
             function createExtravioMotoristaRow(file) {
                   const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
-                  // Correção: Removido 'truncate max-w-md' e adicionado 'whitespace-nowrap'. 'space-x-2' para botões.
                   return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
                             <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
                             <td class="px-6 py-4">${uploadDateFormatted}</td>
                             <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Extravio Motorista</span></td>
                             <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2">
-                                <!-- <button title="Acareação Motorista" class="acareacao-motorista-btn text-slate-500 hover:text-blue-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
-                                </button> -->
                                 <button title="Acareação para Base" class="acareacao-base-btn text-slate-500 hover:text-purple-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.496 2.132a1 1 0 00-1.024 0l-7 4.5A1 1 0 002 7.5v8.5a1 1 0 001 1h14a1 1 0 001-1V7.5a1 1 0 00-.471-.868l-7-4.5zM12 11a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0zm-3 3a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" /></svg>
                                 </button>
@@ -598,7 +625,6 @@
 
             function createExtravioBaseRow(file) {
                   const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
-                  // Correção: Removido 'truncate max-w-md' e adicionado 'whitespace-nowrap'. 'space-x-2' para botões.
                   return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
                             <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
@@ -608,9 +634,6 @@
                                 <button title="Acareação Motorista" class="acareacao-motorista-btn text-slate-500 hover:text-blue-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
                                 </button>
-                                <!-- <button title="Acareação para Base" class="acareacao-base-btn text-slate-500 hover:text-purple-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.496 2.132a1 1 0 00-1.024 0l-7 4.5A1 1 0 002 7.5v8.5a1 1 0 001 1h14a1 1 0 001-1V7.5a1 1 0 00-.471-.868l-7-4.5zM12 11a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0zm-3 3a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" /></svg>
-                                </button> -->
                                 <button title="Visualizar" class="view-btn text-slate-500 hover:text-indigo-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.018 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
                                 </button>
@@ -632,9 +655,11 @@
                 });
                 if (!confirmed) return;
                 
-                AppState = { files: [], solvedCount: 0 };
-                await saveData();
-                render();
+                // Cria um estado vazio e salva
+                const emptyData = { files: [], solvedCount: 0 };
+                AppState = emptyData;
+                await saveData(AppState);
+                render(AppState); // Renderiza o novo estado vazio
                 showNotification('Todos os dados foram limpos com sucesso!');
             });
 
@@ -657,14 +682,8 @@
                 const uploadTime = timeInput.value.trim();
                 const pdfFile = fileInput.files[0];
 
-                if (!pdfFile) {
-                    showNotification("Por favor, selecione um arquivo PDF.", true);
-                    resetSubmitButton();
-                    return;
-                }
-
-                if (!uploadTime) {
-                    showNotification("Por favor, informe o horário do envio.", true);
+                if (!pdfFile || !uploadTime || !folderName) {
+                    showNotification("Por favor, preencha todos os campos.", true);
                     resetSubmitButton();
                     return;
                 }
@@ -695,10 +714,19 @@
                         fileURL: e.target.result, // Base64 data URL
                     };
 
-                    if (!AppState.files) AppState.files = [];
-                    AppState.files.push(newFile);
-                    await saveData();
-                    render();
+                    // BUSCA antes de modificar
+                    const currentData = await getLatestData();
+                    if (!currentData) {
+                         showNotification("Erro de conexão ao salvar. Tente novamente.", true);
+                         resetSubmitButton();
+                         return;
+                    }
+
+                    currentData.files.push(newFile);
+                    AppState = currentData; // Atualiza o estado local
+
+                    await saveData(AppState);
+                    render(AppState); // Renderiza o novo estado
                     showNotification('Arquivo enviado com sucesso!');
                     form.reset();
                     resetSubmitButton();
@@ -718,83 +746,136 @@
                 if (!row || !row.dataset.id) return;
 
                 const fileId = row.dataset.id;
-                const fileIndex = AppState.files.findIndex(f => f.id === fileId);
-                if (fileIndex === -1) return;
+                
+                // Ações que não modificam dados (view, download)
+                if (button.classList.contains('view-btn') || button.classList.contains('download-btn')) {
+                    const file = AppState.files.find(f => f.id === fileId);
+                    if (!file) return;
 
-                const file = AppState.files[fileIndex];
-                let needsSaveAndRender = false;
+                    if (button.classList.contains('view-btn')) {
+                        const pdfWindow = window.open("");
+                        pdfWindow.document.write(
+                            "<html><head><title>" + encodeURIComponent(file.fileName) + "</title></head><body>" +
+                            "<style>body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }</style>" +
+                            '<iframe width="100%" height="100%" src="' + file.fileURL + '"></iframe>' +
+                            "</body></html>"
+                        );
+                        pdfWindow.document.close();
+                    } else if (button.classList.contains('download-btn')) {
+                        const link = document.createElement('a');
+                        link.href = file.fileURL;
+                        link.download = file.fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                    return; // Não precisa salvar/buscar
+                }
 
-                // Ação de Visualizar
-                if (button.classList.contains('view-btn')) {
-                    const pdfWindow = window.open("");
-                    pdfWindow.document.write(
-                        "<html><head><title>" + encodeURIComponent(file.fileName) + "</title></head><body>" +
-                        "<style>body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }</style>" +
-                        '<iframe width="100%" height="100%" src="' + file.fileURL + '"></iframe>' +
-                        "</body></html>"
-                    );
-                    pdfWindow.document.close();
+                // Ações que MODIFICAM dados
+                
+                // 1. BUSCA dados frescos
+                const currentData = await getLatestData();
+                if (!currentData) {
+                    showNotification("Erro de conexão. Sua ação não foi salva. Tente novamente.", true);
+                    return;
                 }
-                // Ação de Baixar
-                else if (button.classList.contains('download-btn')) {
-                    const link = document.createElement('a');
-                    link.href = file.fileURL;
-                    link.download = file.fileName;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+
+                const fileIndex = currentData.files.findIndex(f => f.id === fileId);
+                if (fileIndex === -1) {
+                    showNotification("Arquivo não encontrado. A lista foi atualizada.", true);
+                    AppState = currentData;
+                    render(AppState);
+                    return;
                 }
-                // Ação de Imprimir
-                else if (button.classList.contains('print-btn')) {
-                    AppState.files[fileIndex].status = 'impresso';
-                    needsSaveAndRender = true;
+                
+                let needsSave = false;
+                let notificationMessage = '';
+                
+                // 2. MODIFICA os dados frescos
+                if (button.classList.contains('print-btn')) {
+                    currentData.files[fileIndex].status = 'impresso';
+                    needsSave = true;
                 }
-                // Ação de Solucionar (Deletar)
                 else if (button.classList.contains('delete-btn')) {
                      const confirmed = await openConfirmationModal({
                         title: 'Solucionar Documento',
-                        message: 'Isso irá remover o documento permanentemente. Você tem certeza?'
+                        message: `Isso irá remover o documento '${currentData.files[fileIndex].fileName}' permanentemente. Você tem certeza?`
                     });
                     if (!confirmed) return;
                     
-                    AppState.files.splice(fileIndex, 1);
-                    if (!AppState.solvedCount) AppState.solvedCount = 0;
-                    AppState.solvedCount++;
-                    showNotification('Documento solucionado com sucesso!');
-                    needsSaveAndRender = true;
+                    currentData.files.splice(fileIndex, 1);
+                    currentData.solvedCount = (currentData.solvedCount || 0) + 1;
+                    needsSave = true;
+                    notificationMessage = 'Documento solucionado com sucesso!';
                 }
-                // --- NOVAS AÇÕES ---
                 else if (button.classList.contains('acareacao-motorista-btn')) {
                     const confirmed = await openConfirmationModal({
                         title: 'Confirmar Extravio Motorista',
-                        message: `Mover o documento '${file.fileName}' para Extravio Motorista?`
+                        message: `Mover o documento '${currentData.files[fileIndex].fileName}' para Extravio Motorista?`
                     });
                     if (!confirmed) return;
 
-                    AppState.files[fileIndex].status = 'extravio_motorista';
-                    needsSaveAndRender = true;
+                    currentData.files[fileIndex].status = 'extravio_motorista';
+                    needsSave = true;
                 }
                 else if (button.classList.contains('acareacao-base-btn')) {
                     const confirmed = await openConfirmationModal({
                         title: 'Confirmar Extravio Base',
-                        message: `Mover o documento '${file.fileName}' para Extravio Base?`
+                        message: `Mover o documento '${currentData.files[fileIndex].fileName}' para Extravio Base?`
                     });
                     if (!confirmed) return;
                     
-                    AppState.files[fileIndex].status = 'extravio_base';
-                    needsSaveAndRender = true;
+                    currentData.files[fileIndex].status = 'extravio_base';
+                    needsSave = true;
                 }
 
-
-                if (needsSaveAndRender) {
-                    await saveData();
-                    render();
+                // 3. SALVA e RENDERIZA se algo mudou
+                if (needsSave) {
+                    AppState = currentData; // Atualiza o estado local
+                    await saveData(AppState); // Salva os dados modificados
+                    render(AppState); // Re-renderiza imediatamente com o novo estado
+                    if (notificationMessage) {
+                         showNotification(notificationMessage);
+                    }
                 }
             });
 
             // --- Inicialização da aplicação ---
-            fetchData(); 
-            setInterval(fetchData, 30000); 
+            
+            // Função para iniciar a busca inicial
+            async function initializeApp() {
+                const initialData = await getLatestData();
+                if (initialData) {
+                    AppState = initialData;
+                    render(AppState); // Renderiza os dados iniciais
+                } else {
+                    // Falha ao carregar, esconde o spinner mesmo assim
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    showNotification("Falha ao carregar dados iniciais.", true);
+                }
+                startAutoUpdate(); // Inicia o poller DEPOIS da carga inicial
+            }
+            
+            // Função para iniciar/reiniciar o poller (atualização automática)
+            function startAutoUpdate() {
+                clearInterval(autoUpdateInterval); // Limpa qualquer intervalo anterior
+                autoUpdateInterval = setInterval(async () => {
+                    if (isSaving) return; // Não atualiza se estiver salvando
+
+                    const data = await getLatestData();
+                    if (data) {
+                        // Compara simplisticamente para ver se algo mudou
+                        if (JSON.stringify(data) !== JSON.stringify(AppState)) {
+                            AppState = data;
+                            render(AppState);
+                            showNotification("Lista atualizada automaticamente.", false);
+                        }
+                    }
+                }, 30000); // 30 segundos
+            }
+            
+            initializeApp(); // Chama a função de inicialização
         });
     </script>
 </body>
