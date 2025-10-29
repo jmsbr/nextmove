@@ -10,8 +10,10 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc; /* bg-slate-50 */
+            overflow-x: hidden; /* Previne barra horizontal no body */
         }
-        ::-webkit-scrollbar { width: 8px; }
+        /* Estilos da barra de rolagem (opcional, para visualização vertical se necessário) */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
@@ -45,11 +47,13 @@
             <div class="flex items-center space-x-4 md:space-x-6 mt-4 sm:mt-0">
                 <!-- Logo J&T Express -->
                 <img src="https://www.jtexpress.com.br/mobile/static/png/leader_1-c3f7a853.png" alt="Logo J&T Express" class="h-16 w-auto">
+                <!-- Nova Logo J&T Express -->
+                <img src="https://yl-pufile.jtexpress.ph/osbforever/YL_JMS_OFFICIAL_MANAGE/INFORMATION/20241104/1730704731890-1092-OurServices001.png" alt="Nova Logo J&T Express" class="h-16 w-auto">
             </div>
         </header>
 
-        <!-- Grade de Status -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-6 mb-8">
+        <!-- Grade de Status (Ajustada para 5 colunas no max) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
              <!-- Pendentes -->
             <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
                 <div class="bg-indigo-100 rounded-full w-12 h-12 flex items-center justify-center">
@@ -85,7 +89,7 @@
                 <div><h3 class="text-sm font-semibold text-slate-500 uppercase">Vencidos</h3><p id="expired-count" class="text-3xl font-bold text-red-600 mt-1">0</p></div>
             </div>
 
-            <!-- Extravio Motorista (NOVO) -->
+            <!-- Extravio Motorista -->
             <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
                 <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center">
                     <svg class="h-6 w-6 text-orange-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -95,7 +99,7 @@
                 <div><h3 class="text-sm font-semibold text-slate-500 uppercase">Extravio Motorista</h3><p id="extravio-motorista-count" class="text-3xl font-bold text-orange-600 mt-1">0</p></div>
             </div>
 
-            <!-- Extravio Base (NOVO) -->
+            <!-- Extravio Base -->
             <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
                 <div class="bg-teal-100 rounded-full w-12 h-12 flex items-center justify-center">
                     <svg class="h-6 w-6 text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -176,8 +180,6 @@
             </div>
         </div>
 
-        <!-- INÍCIO: Novas Seções de Extravio -->
-
         <!-- Seção da Lista de Extravio Motorista -->
         <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-8">
             <h2 class="text-xl font-semibold text-slate-800 p-6">Extravio Motorista</h2>
@@ -186,7 +188,7 @@
                     <thead class="bg-slate-50 text-xs text-slate-700 uppercase">
                         <tr>
                             <th scope="col" class="px-6 py-3">Nome do Arquivo</th>
-                            <th scope="col" class="px-6 py-3">Pasta</th>
+                            <th scope="col" class_Name="px-6 py-3">Pasta</th>
                             <th scope="col" class="px-6 py-3">Data de Envio</th>
                             <th scope="col" class="px-6 py-3">Status</th>
                             <th scope="col" class="px-6 py-3 text-center">Ações</th>
@@ -220,9 +222,7 @@
             </div>
         </div>
 
-        <!-- FIM: Novas Seções de Extravio -->
-
-         <!-- Seção para Adicionar Novo Documento -->
+        <!-- Seção para Adicionar Novo Documento -->
         <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
             <h2 class="text-xl font-semibold text-slate-800 mb-4">Enviar Nova Acareação (PDF)</h2>
              <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 mb-4 rounded-r-lg" role="alert">
@@ -240,7 +240,7 @@
                     <input type="time" id="upload-time" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
                 </div>
                 <div>
-                    <label for="pdf-file-input" class="block text-sm font-medium text-slate-700 mb-1">Selecione o arquivo PDF</label>
+                    <label for="pdf-file-input" class="block w-full text-sm font-medium text-slate-700 mb-1">Selecione o arquivo PDF</label>
                     <input type="file" id="pdf-file-input" accept=".pdf" required class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                 </div>
                  <button type="submit" id="submit-button" class="w-full sm:w-auto bg-indigo-600 text-white font-bold py-2 px-6 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 flex items-center justify-center space-x-2">
@@ -483,12 +483,13 @@
                 const deadlineFormatted = new Date(file.deadline).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
                 const statusClass = isAlerting ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800';
                 const statusText = isAlerting ? 'Expirando' : 'Pendente';
+                // Correção: Removido 'truncate max-w-md' e adicionado 'whitespace-nowrap'. 'space-x-2' para botões.
                 return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
-                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
+                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
                             <td class="px-6 py-4">${deadlineFormatted}</td>
                             <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">${statusText}</span></td>
-                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2 sm:space-x-3">
+                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2">
                                 <button title="Marcar como Impresso" class="print-btn text-slate-500 hover:text-green-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -513,11 +514,12 @@
             }
 
             function createPrintedRow(file) {
+                // Correção: Removido 'truncate max-w-md' e adicionado 'whitespace-nowrap'. 'space-x-2' para botões.
                 return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
-                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
+                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
                             <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">Impresso</span></td>
-                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2 sm:space-x-3">
+                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2">
                                 <button title="Acareação Motorista" class="acareacao-motorista-btn text-slate-500 hover:text-blue-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
                                 </button>
@@ -538,12 +540,13 @@
 
             function createExpiredRow(file) {
                   const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
+                  // Correção: Removido 'truncate max-w-md' e adicionado 'whitespace-nowrap'. 'space-x-2' para botões.
                   return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
-                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
+                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
                             <td class="px-6 py-4">${uploadDateFormatted}</td>
                             <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Vencido</span></td>
-                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2 sm:space-x-3">
+                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2">
                                 <button title="Acareação Motorista" class="acareacao-motorista-btn text-slate-500 hover:text-blue-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
                                 </button>
@@ -566,12 +569,13 @@
 
             function createExtravioMotoristaRow(file) {
                   const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
+                  // Correção: Removido 'truncate max-w-md' e adicionado 'whitespace-nowrap'. 'space-x-2' para botões.
                   return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
-                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
+                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
                             <td class="px-6 py-4">${uploadDateFormatted}</td>
                             <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Extravio Motorista</span></td>
-                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2 sm:space-x-3">
+                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2">
                                 <!-- <button title="Acareação Motorista" class="acareacao-motorista-btn text-slate-500 hover:text-blue-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
                                 </button> -->
@@ -592,12 +596,13 @@
 
             function createExtravioBaseRow(file) {
                   const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
+                  // Correção: Removido 'truncate max-w-md' e adicionado 'whitespace-nowrap'. 'space-x-2' para botões.
                   return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
-                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
+                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
                             <td class="px-6 py-4">${uploadDateFormatted}</td>
                             <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">Extravio Base</span></td>
-                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2 sm:space-x-3">
+                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2">
                                 <button title="Acareação Motorista" class="acareacao-motorista-btn text-slate-500 hover:text-blue-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
                                 </button>
