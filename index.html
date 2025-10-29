@@ -79,7 +79,7 @@
             <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
                 <div class="bg-red-100 rounded-full w-12 h-12 flex items-center justify-center">
                     <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                     </svg>
                 </div>
                 <div><h3 class="text-sm font-semibold text-slate-500 uppercase">Vencidos</h3><p id="expired-count" class="text-3xl font-bold text-red-600 mt-1">0</p></div>
@@ -155,6 +155,52 @@
             </div>
         </div>
 
+        <!-- INÍCIO: Novas Seções de Extravio -->
+
+        <!-- Seção da Lista de Extravio Motorista -->
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-8">
+            <h2 class="text-xl font-semibold text-slate-800 p-6">Extravio Motorista</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-600">
+                    <thead class="bg-slate-50 text-xs text-slate-700 uppercase">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Nome do Arquivo</th>
+                            <th scope="col" class="px-6 py-3">Pasta</th>
+                            <th scope="col" class="px-6 py-3">Data de Envio</th>
+                            <th scope="col" class="px-6 py-3">Status</th>
+                            <th scope="col" class="px-6 py-3 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="extravio-motorista-list" class="divide-y divide-slate-200">
+                         <tr id="empty-state-extravio-motorista"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento em extravio motorista.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Seção da Lista de Extravio Base -->
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-8">
+            <h2 class="text-xl font-semibold text-slate-800 p-6">Extravio Base</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-600">
+                    <thead class="bg-slate-50 text-xs text-slate-700 uppercase">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Nome do Arquivo</th>
+                            <th scope="col" class="px-6 py-3">Pasta</th>
+                            <th scope="col" class="px-6 py-3">Data de Envio</th>
+                            <th scope="col" class="px-6 py-3">Status</th>
+                            <th scope="col" class="px-6 py-3 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="extravio-base-list" class="divide-y divide-slate-200">
+                         <tr id="empty-state-extravio-base"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento em extravio base.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FIM: Novas Seções de Extravio -->
+
          <!-- Seção para Adicionar Novo Documento -->
         <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
             <h2 class="text-xl font-semibold text-slate-800 mb-4">Enviar Nova Acareação (PDF)</h2>
@@ -162,7 +208,7 @@
                 <p>
                     <strong>Atenção:</strong> Arquivos grandes (acima de 1MB) podem demorar para carregar ou causar erros.
                 </p>
-            </div>
+             </div>
             <form id="upload-form" class="space-y-4">
                  <div>
                     <label for="folder-name" class="block text-sm font-medium text-slate-700 mb-1">Data do Envio</label>
@@ -234,6 +280,9 @@
             const pendingFileList = document.getElementById('file-list');
             const printedFileList = document.getElementById('printed-file-list');
             const expiredFileList = document.getElementById('expired-file-list');
+            // Novos elementos da lista
+            const extravioMotoristaList = document.getElementById('extravio-motorista-list');
+            const extravioBaseList = document.getElementById('extravio-base-list');
 
             const pendingCountEl = document.getElementById('pending-count');
             const printedCountEl = document.getElementById('printed-count');
@@ -322,7 +371,8 @@
                 let needsUpdate = false;
                 if (!AppState.files) AppState.files = []; 
                 AppState.files.forEach(file => {
-                    if ((file.status === 'pending' || file.status === 'impresso') && now > file.deadline) {
+                    // Adiciona novos status ao check de vencimento
+                    if ((file.status === 'pending' || file.status === 'impresso' || file.status === 'extravio_motorista' || file.status === 'extravio_base') && now > file.deadline) {
                         file.status = 'expired';
                         needsUpdate = true;
                     }
@@ -331,12 +381,20 @@
                 pendingFileList.innerHTML = '';
                 printedFileList.innerHTML = '';
                 expiredFileList.innerHTML = '';
+                // Limpa novas listas
+                extravioMotoristaList.innerHTML = '';
+                extravioBaseList.innerHTML = '';
+
 
                 let alertCount = 0;
 
                 const pendingFiles = AppState.files.filter(f => f.status === 'pending');
                 const printedFiles = AppState.files.filter(f => f.status === 'impresso');
                 const expiredFiles = AppState.files.filter(f => f.status === 'expired');
+                // Filtra novas listas
+                const extravioMotoristaFiles = AppState.files.filter(f => f.status === 'extravio_motorista');
+                const extravioBaseFiles = AppState.files.filter(f => f.status === 'extravio_base');
+
 
                 if (pendingFiles.length === 0) {
                     pendingFileList.innerHTML = `<tr id="empty-state-pending"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>`;
@@ -367,6 +425,19 @@
                 } else {
                     expiredFiles.sort((a, b) => b.uploadDate - a.uploadDate).forEach(file => expiredFileList.insertAdjacentHTML('beforeend', createExpiredRow(file)));
                 }
+
+                // Renderiza novas listas
+                if (extravioMotoristaFiles.length === 0) {
+                    extravioMotoristaList.innerHTML = `<tr id="empty-state-extravio-motorista"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento em extravio motorista.</td></tr>`;
+                } else {
+                    extravioMotoristaFiles.sort((a, b) => b.uploadDate - a.uploadDate).forEach(file => extravioMotoristaList.insertAdjacentHTML('beforeend', createExtravioMotoristaRow(file)));
+                }
+
+                if (extravioBaseFiles.length === 0) {
+                    extravioBaseList.innerHTML = `<tr id="empty-state-extravio-base"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento em extravio base.</td></tr>`;
+                } else {
+                    extravioBaseFiles.sort((a, b) => b.uploadDate - a.uploadDate).forEach(file => extravioBaseList.insertAdjacentHTML('beforeend', createExtravioBaseRow(file)));
+                }
                 
                 pendingCountEl.textContent = pendingFiles.length;
                 printedCountEl.textContent = printedFiles.length;
@@ -379,21 +450,29 @@
                 }
             }
 
+            // --- Funções de Criação de Linhas (com novos botões) ---
+
             function createPendingRow(file, isAlerting) {
                 const deadlineFormatted = new Date(file.deadline).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
                 const statusClass = isAlerting ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800';
                 const statusText = isAlerting ? 'Expirando' : 'Pendente';
                 return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
-                        <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
-                        <td class="px-6 py-4">${file.folderName}</td>
-                        <td class="px-6 py-4">${deadlineFormatted}</td>
-                        <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">${statusText}</span></td>
-                        <td class="px-6 py-4"><div class="flex items-center justify-center space-x-4">
+                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
+                            <td class="px-6 py-4">${file.folderName}</td>
+                            <td class="px-6 py-4">${deadlineFormatted}</td>
+                            <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">${statusText}</span></td>
+                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2 sm:space-x-3">
                                 <button title="Marcar como Impresso" class="print-btn text-slate-500 hover:text-green-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                     </svg>
                                 </button>
+                                <button title="Acareação Motorista" class="acareacao-motorista-btn text-slate-500 hover:text-blue-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                                </button>
+                                <button title="Acareação para Base" class="acareacao-base-btn text-slate-500 hover:text-purple-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.496 2.132a1 1 0 00-1.024 0l-7 4.5A1 1 0 002 7.5v8.5a1 1 0 001 1h14a1 1 0 001-1V7.5a1 1 0 00-.471-.868l-7-4.5zM12 11a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0zm-3 3a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" /></svg>
+                                </button>
                                 <button title="Visualizar" class="view-btn text-slate-500 hover:text-indigo-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.018 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
                                 </button>
@@ -403,15 +482,21 @@
                                 <button title="Solucionar / Excluir" class="delete-btn text-slate-500 hover:text-red-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
                                 </button>
-                        </div></td></tr>`;
+                            </div></td></tr>`;
             }
 
             function createPrintedRow(file) {
                 return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
-                        <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
-                        <td class="px-6 py-4">${file.folderName}</td>
-                        <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">Impresso</span></td>
-                        <td class="px-6 py-4"><div class="flex items-center justify-center space-x-4">
+                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
+                            <td class="px-6 py-4">${file.folderName}</td>
+                            <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">Impresso</span></td>
+                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2 sm:space-x-3">
+                                <button title="Acareação Motorista" class="acareacao-motorista-btn text-slate-500 hover:text-blue-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                                </button>
+                                <button title="Acareação para Base" class="acareacao-base-btn text-slate-500 hover:text-purple-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.496 2.132a1 1 0 00-1.024 0l-7 4.5A1 1 0 002 7.5v8.5a1 1 0 001 1h14a1 1 0 001-1V7.5a1 1 0 00-.471-.868l-7-4.5zM12 11a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0zm-3 3a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" /></svg>
+                                </button>
                                 <button title="Visualizar" class="view-btn text-slate-500 hover:text-indigo-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.018 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
                                 </button>
@@ -421,17 +506,23 @@
                                 <button title="Solucionar / Excluir" class="delete-btn text-slate-500 hover:text-red-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
                                 </button>
-                        </div></td></tr>`;
+                            </div></td></tr>`;
             }
 
             function createExpiredRow(file) {
                   const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
                   return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
-                        <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
-                        <td class="px-6 py-4">${file.folderName}</td>
-                        <td class="px-6 py-4">${uploadDateFormatted}</td>
-                        <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Vencido</span></td>
-                        <td class="px-6 py-4"><div class="flex items-center justify-center space-x-4">
+                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
+                            <td class="px-6 py-4">${file.folderName}</td>
+                            <td class="px-6 py-4">${uploadDateFormatted}</td>
+                            <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Vencido</span></td>
+                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2 sm:space-x-3">
+                                <button title="Acareação Motorista" class="acareacao-motorista-btn text-slate-500 hover:text-blue-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                                </button>
+                                <button title="Acareação para Base" class="acareacao-base-btn text-slate-500 hover:text-purple-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.496 2.132a1 1 0 00-1.024 0l-7 4.5A1 1 0 002 7.5v8.5a1 1 0 001 1h14a1 1 0 001-1V7.5a1 1 0 00-.471-.868l-7-4.5zM12 11a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0zm-3 3a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" /></svg>
+                                </button>
                                 <button title="Visualizar" class="view-btn text-slate-500 hover:text-indigo-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.018 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
                                 </button>
@@ -441,7 +532,61 @@
                                 <button title="Solucionar / Excluir" class="delete-btn text-slate-500 hover:text-red-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
                                 </button>
-                        </div></td></tr>`;
+                            </div></td></tr>`;
+            }
+
+            // --- Novas Funções de Linha ---
+
+            function createExtravioMotoristaRow(file) {
+                  const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
+                  return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
+                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
+                            <td class="px-6 py-4">${file.folderName}</td>
+                            <td class="px-6 py-4">${uploadDateFormatted}</td>
+                            <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Extravio Motorista</span></td>
+                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2 sm:space-x-3">
+                                <!-- <button title="Acareação Motorista" class="acareacao-motorista-btn text-slate-500 hover:text-blue-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                                </button> -->
+                                <button title="Acareação para Base" class="acareacao-base-btn text-slate-500 hover:text-purple-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.496 2.132a1 1 0 00-1.024 0l-7 4.5A1 1 0 002 7.5v8.5a1 1 0 001 1h14a1 1 0 001-1V7.5a1 1 0 00-.471-.868l-7-4.5zM12 11a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0zm-3 3a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" /></svg>
+                                </button>
+                                <button title="Visualizar" class="view-btn text-slate-500 hover:text-indigo-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.018 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                                </button>
+                                <button title="Baixar" class="download-btn text-slate-500 hover:text-emerald-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                </button>
+                                <button title="Solucionar / Excluir" class="delete-btn text-slate-500 hover:text-red-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                                </button>
+                            </div></td></tr>`;
+            }
+
+            function createExtravioBaseRow(file) {
+                  const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
+                  return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
+                            <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${file.fileName}</td>
+                            <td class="px-6 py-4">${file.folderName}</td>
+                            <td class="px-6 py-4">${uploadDateFormatted}</td>
+                            <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">Extravio Base</span></td>
+                            <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2 sm:space-x-3">
+                                <button title="Acareação Motorista" class="acareacao-motorista-btn text-slate-500 hover:text-blue-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                                </button>
+                                <!-- <button title="Acareação para Base" class="acareacao-base-btn text-slate-500 hover:text-purple-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.496 2.132a1 1 0 00-1.024 0l-7 4.5A1 1 0 002 7.5v8.5a1 1 0 001 1h14a1 1 0 001-1V7.5a1 1 0 00-.471-.868l-7-4.5zM12 11a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0zm-3 3a1 1 0 11-2 0 1 1 0 012 0zm-3 0a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" /></svg>
+                                </button> -->
+                                <button title="Visualizar" class="view-btn text-slate-500 hover:text-indigo-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.018 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                                </button>
+                                <button title="Baixar" class="download-btn text-slate-500 hover:text-emerald-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                </button>
+                                <button title="Solucionar / Excluir" class="delete-btn text-slate-500 hover:text-red-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                                </button>
+                            </div></td></tr>`;
             }
 
             // --- Event Listeners ---
@@ -584,6 +729,28 @@
                     showNotification('Documento solucionado com sucesso!');
                     needsSaveAndRender = true;
                 }
+                // --- NOVAS AÇÕES ---
+                else if (button.classList.contains('acareacao-motorista-btn')) {
+                    const confirmed = await openConfirmationModal({
+                        title: 'Confirmar Extravio Motorista',
+                        message: `Mover o documento '${file.fileName}' para Extravio Motorista?`
+                    });
+                    if (!confirmed) return;
+
+                    AppState.files[fileIndex].status = 'extravio_motorista';
+                    needsSaveAndRender = true;
+                }
+                else if (button.classList.contains('acareacao-base-btn')) {
+                    const confirmed = await openConfirmationModal({
+                        title: 'Confirmar Extravio Base',
+                        message: `Mover o documento '${file.fileName}' para Extravio Base?`
+                    });
+                    if (!confirmed) return;
+                    
+                    AppState.files[fileIndex].status = 'extravio_base';
+                    needsSaveAndRender = true;
+                }
+
 
                 if (needsSaveAndRender) {
                     await saveData();
@@ -598,4 +765,3 @@
     </script>
 </body>
 </html>
-
