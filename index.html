@@ -395,8 +395,10 @@
                 let needsUpdate = false;
                 if (!AppState.files) AppState.files = []; 
                 AppState.files.forEach(file => {
-                    // Adiciona novos status ao check de vencimento
-                    if ((file.status === 'pending' || file.status === 'impresso' || file.status === 'extravio_motorista' || file.status === 'extravio_base') && now > file.deadline) {
+                    // *** CORREÇÃO DO BUG AQUI ***
+                    // Apenas 'pending' e 'impresso' podem se tornar 'expired'.
+                    // Não re-verificar 'extravio_motorista' ou 'extravio_base'.
+                    if ((file.status === 'pending' || file.status === 'impresso') && now > file.deadline) {
                         file.status = 'expired';
                         needsUpdate = true;
                     }
