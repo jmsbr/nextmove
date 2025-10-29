@@ -49,7 +49,7 @@
         </header>
 
         <!-- Grade de Status -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-6 mb-8">
              <!-- Pendentes -->
             <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
                 <div class="bg-indigo-100 rounded-full w-12 h-12 flex items-center justify-center">
@@ -84,6 +84,27 @@
                 </div>
                 <div><h3 class="text-sm font-semibold text-slate-500 uppercase">Vencidos</h3><p id="expired-count" class="text-3xl font-bold text-red-600 mt-1">0</p></div>
             </div>
+
+            <!-- Extravio Motorista (NOVO) -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
+                <div class="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center">
+                    <svg class="h-6 w-6 text-orange-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h.008v.008h-.008v-.008zm0 0H20.625a1.125 1.125 0 001.125-1.125V14.25m-17.25 4.5h14.25m-14.25 0V6.75a1.125 1.125 0 011.125-1.125h14.25a1.125 1.125 0 011.125 1.125v10.5m-17.25 4.5H3.375m17.25 0H20.625m0 0a1.125 1.125 0 001.125-1.125V6.75a1.125 1.125 0 00-1.125-1.125H3.375a1.125 1.125 0 00-1.125 1.125v10.5a1.125 1.125 0 001.125 1.125h.008m17.25 0h.008v.008h-.008v-.008zm0 0H20.625" />
+                    </svg>
+                </div>
+                <div><h3 class="text-sm font-semibold text-slate-500 uppercase">Extravio Motorista</h3><p id="extravio-motorista-count" class="text-3xl font-bold text-orange-600 mt-1">0</p></div>
+            </div>
+
+            <!-- Extravio Base (NOVO) -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
+                <div class="bg-teal-100 rounded-full w-12 h-12 flex items-center justify-center">
+                    <svg class="h-6 w-6 text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h6.75M9 11.25h6.75M9 15.75h6.75M5.25 6h.008v.008H5.25V6zm.008 4.5h.008v.008H5.25v-.008zm0 4.5h.008v.008H5.25v-.008zm13.5-9h.008v.008h-.008V6zm0 4.5h.008v.008h-.008v-.008zm0 4.5h.008v.008h-.008v-.008z" />
+                    </svg>
+                </div>
+                <div><h3 class="text-sm font-semibold text-slate-500 uppercase">Extravio Base</h3><p id="extravio-base-count" class="text-3xl font-bold text-teal-600 mt-1">0</p></div>
+            </div>
+
             <!-- Solucionados -->
             <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
                  <div class="bg-emerald-100 rounded-full w-12 h-12 flex items-center justify-center">
@@ -289,6 +310,9 @@
             const alertCountEl = document.getElementById('alert-count');
             const expiredCountEl = document.getElementById('expired-count');
             const solvedCountEl = document.getElementById('solved-count');
+            // IDs para novos contadores
+            const extravioMotoristaCountEl = document.getElementById('extravio-motorista-count');
+            const extravioBaseCountEl = document.getElementById('extravio-base-count');
 
             const modal = document.getElementById('confirmation-modal');
             const notificationEl = document.getElementById('notification');
@@ -444,6 +468,9 @@
                 alertCountEl.textContent = alertCount;
                 expiredCountEl.textContent = expiredFiles.length;
                 solvedCountEl.textContent = AppState.solvedCount || 0;
+                // Atualiza novos contadores
+                extravioMotoristaCountEl.textContent = extravioMotoristaFiles.length;
+                extravioBaseCountEl.textContent = extravioBaseFiles.length;
 
                 if(needsUpdate) {
                     saveData();
@@ -765,3 +792,4 @@
     </script>
 </body>
 </html>
+
