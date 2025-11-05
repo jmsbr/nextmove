@@ -144,11 +144,14 @@
                             <th scope="col" class="px-6 py-3">Pasta</th>
                             <th scope="col" class="px-6 py-3">Prazo Final</th>
                             <th scope="col" class="px-6 py-3">Status</th>
+                            <!-- Coluna Adicionada -->
+                            <th scope="col" class="px-6 py-3">Notif. Wpp</th>
                             <th scope="col" class="px-6 py-3 text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="file-list" class="divide-y divide-slate-200">
-                        <tr id="empty-state-pending"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>
+                        <!-- Colspan atualizado para 6 -->
+                        <tr id="empty-state-pending"><td colspan="6" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -241,9 +244,9 @@
         <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
             <h2 class="text-xl font-semibold text-slate-800 mb-4">Enviar Nova Acareação (PDF)</h2>
              <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 mb-4 rounded-r-lg" role="alert">
-                <p>
-                    <strong>Atenção:</strong> Arquivos grandes (acima de 1MB) podem demorar para carregar ou causar erros.
-                </p>
+                 <p>
+                     <strong>Atenção:</strong> Arquivos grandes (acima de 1MB) podem demorar para carregar ou causar erros.
+                 </p>
              </div>
             <form id="upload-form" class="space-y-4">
                  <div>
@@ -294,12 +297,12 @@
             // --- Verificação da URL ---
             if (!DATABASE_URL || DATABASE_URL === "COLE_SUA_URL_AQUI") {
                  document.body.innerHTML = `
-                    <div class="h-screen w-screen flex items-center justify-center bg-slate-50 p-4">
-                        <div class="text-center p-8 bg-white rounded-lg shadow-xl max-w-lg">
-                            <h1 class="text-2xl font-bold text-red-600">Configuração Necessária</h1>
-                            <p class="text-slate-600 mt-2">Por favor, siga as instruções para criar seu banco de dados online gratuito no site npoint.io e cole a URL gerada na variável DATABASE_URL dentro do código deste arquivo.</p>
-                        </div>
-                    </div>`;
+                     <div class="h-screen w-screen flex items-center justify-center bg-slate-50 p-4">
+                         <div class="text-center p-8 bg-white rounded-lg shadow-xl max-w-lg">
+                             <h1 class="text-2xl font-bold text-red-600">Configuração Necessária</h1>
+                             <p class="text-slate-600 mt-2">Por favor, siga as instruções para criar seu banco de dados online gratuito no site npoint.io e cole a URL gerada na variável DATABASE_URL dentro do código deste arquivo.</p>
+                         </div>
+                     </div>`;
                 return;
             }
 
@@ -338,7 +341,8 @@
                 clearTimeout(notificationTimeout);
                 notificationMessageEl.textContent = message;
                 notificationEl.classList.remove('hidden', 'bg-red-500', 'bg-amber-500');
-                notificationEl.classList.add(isError ? 'bg-red-500' : 'bg-amber-500');
+                // Alterado para 'bg-emerald-500' para sucesso/info
+                notificationEl.classList.add(isError ? 'bg-red-500' : 'bg-emerald-500'); 
                 notificationTimeout = setTimeout(() => {
                     notificationEl.classList.add('hidden');
                 }, 4000);
@@ -448,7 +452,7 @@
 
                 // Renderiza Tabela Pendentes
                 if (pendingFiles.length === 0) {
-                    pendingFileList.innerHTML = `<tr id="empty-state-pending"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>`;
+                    pendingFileList.innerHTML = `<tr id="empty-state-pending"><td colspan="6" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>`;
                 } else {
                     pendingFiles.sort((a, b) => a.deadline - b.deadline).forEach(file => {
                         const timeLeft = file.deadline - now;
@@ -456,7 +460,8 @@
                         if (isAlerting) {
                             alertCount++;
                             if (!file.alertNotified) {
-                                showNotification(`Atenção: O documento '${file.fileName}' está prestes a vencer!`);
+                                // Mostra notificação de alerta (não erro)
+                                showNotification(`Atenção: O documento '${file.fileName}' está prestes a vencer!`, false);
                                 file.alertNotified = true;
                                 needsStatusUpdate = true;
                             }
@@ -515,17 +520,38 @@
             }
 
             // --- Funções de Criação de Linhas ---
-            // (Colar aqui as 5 funções: createPendingRow, createPrintedRow, createExpiredRow, createExtravioMotoristaRow, createExtravioBaseRow)
-            // (Elas permanecem iguais à versão anterior, sem truncar o nome)
+            
+            // ATUALIZADA: createPendingRow agora inclui a coluna de status do WhatsApp
             function createPendingRow(file, isAlerting) {
                 const deadlineFormatted = new Date(file.deadline).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
                 const statusClass = isAlerting ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800';
                 const statusText = isAlerting ? 'Expirando' : 'Pendente';
+
+                // Lógica para o status do WhatsApp
+                const wppNotified = file.whatsappNotified === 'yes';
+                const wppStatusText = wppNotified ? 'Sim' : 'Não';
+                const wppStatusClass = wppNotified ? 'text-green-600' : 'text-red-600';
+                const wppBtnTitle = wppNotified ? 'Marcar como Não Notificado' : 'Marcar como Notificado (Sim)';
+                const wppBtnIcon = wppNotified ? 
+                    `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>` : // Check circle
+                    `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>`; // X circle
+
                 return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
                             <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
                             <td class="px-6 py-4">${deadlineFormatted}</td>
                             <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">${statusText}</span></td>
+                            
+                            <!-- Coluna Adicionada -->
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <span class="font-medium ${wppStatusClass}">${wppStatusText}</span>
+                                    <button title="${wppBtnTitle}" class="whatsapp-toggle-btn text-slate-500 hover:text-blue-600">
+                                        ${wppBtnIcon}
+                                    </button>
+                                </div>
+                            </td>
+
                             <td class="px-6 py-4"><div class="flex items-center justify-center space-x-2">
                                 <button title="Marcar como Impresso" class="print-btn text-slate-500 hover:text-green-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -547,7 +573,8 @@
                                 <button title="Solucionar / Excluir" class="delete-btn text-slate-500 hover:text-red-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
                                 </button>
-                            </div></td></tr>`;
+                            </div></td>
+                        </tr>`;
             }
 
             function createPrintedRow(file) {
@@ -575,7 +602,7 @@
             }
 
             function createExpiredRow(file) {
-                  const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
+                 const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
                   return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
                             <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
@@ -601,7 +628,7 @@
             }
 
             function createExtravioMotoristaRow(file) {
-                  const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
+                 const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
                   return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
                             <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
@@ -624,7 +651,7 @@
             }
 
             function createExtravioBaseRow(file) {
-                  const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
+                 const uploadDateFormatted = new Date(file.uploadDate).toLocaleDateString('pt-BR');
                   return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
                             <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
                             <td class="px-6 py-4">${file.folderName}</td>
@@ -712,6 +739,7 @@
                         deadline: uploadTimestamp + (24 * 60 * 60 * 1000), 
                         status: 'pending', 
                         fileURL: e.target.result, // Base64 data URL
+                        whatsappNotified: 'no' // Propriedade Adicionada
                     };
 
                     // BUSCA antes de modificar
@@ -796,11 +824,12 @@
                 if (button.classList.contains('print-btn')) {
                     currentData.files[fileIndex].status = 'impresso';
                     needsSave = true;
+                    notificationMessage = 'Marcado como impresso!';
                 }
                 else if (button.classList.contains('delete-btn')) {
                      const confirmed = await openConfirmationModal({
-                        title: 'Solucionar Documento',
-                        message: `Isso irá remover o documento '${currentData.files[fileIndex].fileName}' permanentemente. Você tem certeza?`
+                         title: 'Solucionar Documento',
+                         message: `Isso irá remover o documento '${currentData.files[fileIndex].fileName}' permanentemente. Você tem certeza?`
                     });
                     if (!confirmed) return;
                     
@@ -818,6 +847,7 @@
 
                     currentData.files[fileIndex].status = 'extravio_motorista';
                     needsSave = true;
+                    notificationMessage = 'Movido para Extravio Motorista.';
                 }
                 else if (button.classList.contains('acareacao-base-btn')) {
                     const confirmed = await openConfirmationModal({
@@ -828,6 +858,14 @@
                     
                     currentData.files[fileIndex].status = 'extravio_base';
                     needsSave = true;
+                    notificationMessage = 'Movido para Extravio Base.';
+                }
+                // Handler Adicionado
+                else if (button.classList.contains('whatsapp-toggle-btn')) {
+                    const file = currentData.files[fileIndex];
+                    file.whatsappNotified = file.whatsappNotified === 'yes' ? 'no' : 'yes'; // Alterna
+                    needsSave = true;
+                    notificationMessage = `Status do WhatsApp atualizado para '${file.whatsappNotified === 'yes' ? 'Sim' : 'Não'}'.`;
                 }
 
                 // 3. SALVA e RENDERIZA se algo mudou
@@ -836,7 +874,7 @@
                     await saveData(AppState); // Salva os dados modificados
                     render(AppState); // Re-renderiza imediatamente com o novo estado
                     if (notificationMessage) {
-                         showNotification(notificationMessage);
+                        showNotification(notificationMessage);
                     }
                 }
             });
@@ -869,6 +907,7 @@
                         if (JSON.stringify(data) !== JSON.stringify(AppState)) {
                             AppState = data;
                             render(AppState);
+                            // Notificação de atualização (não erro)
                             showNotification("Lista atualizada automaticamente.", false);
                         }
                     }
@@ -880,4 +919,3 @@
     </script>
 </body>
 </html>
-
