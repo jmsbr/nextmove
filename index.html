@@ -133,6 +133,43 @@
             </div>
         </div>
 
+        <!-- ATUALIZAÇÃO: Filtros de Data -->
+        <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200 mb-8 flex flex-col sm:flex-row gap-4 items-center">
+            <h3 class="text-lg font-semibold text-slate-700 whitespace-nowrap">Filtrar por Data:</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+                <div>
+                    <label for="month-filter" class="block text-sm font-medium text-slate-700">Mês</label>
+                    <select id="month-filter" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="all">Todos os Meses</option>
+                        <option value="0">Janeiro</option>
+                        <option value="1">Fevereiro</option>
+                        <option value="2">Março</option>
+                        <option value="3">Abril</option>
+                        <option value="4">Maio</option>
+                        <option value="5">Junho</option>
+                        <option value="6">Julho</option>
+                        <option value="7">Agosto</option>
+                        <option value="8">Setembro</option>
+                        <option value="9">Outubro</option>
+                        <option value="10">Novembro</option>
+                        <option value="11">Dezembro</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="year-filter" class="block text-sm font-medium text-slate-700">Ano</label>
+                    <select id="year-filter" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="all">Todos os Anos</option>
+                        <!-- Anos serão preenchidos por JS -->
+                    </select>
+                </div>
+                <div class="sm:self-end">
+                    <button id="reset-filter-btn" class="w-full px-4 py-2 bg-slate-600 text-white rounded-md hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
+                        Mostrar Mês Atual
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Seção da Lista de Arquivos Pendentes -->
         <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-8">
             <h2 class="text-xl font-semibold text-slate-800 p-6">Documentos Pendentes</h2>
@@ -185,7 +222,7 @@
                     <thead class="bg-slate-50 text-xs text-slate-700 uppercase">
                         <tr>
                             <th scope="col" class="px-6 py-3">Nome do Arquivo</th>
-                            <th scope="col" class="px-6 py-3">Pasta</th>
+                            <th scope="col" classs="px-6 py-3">Pasta</th>
                             <th scope="col" class="px-6 py-3">Data de Envio</th>
                             <th scope="col" class="px-6 py-3">Status</th>
                             <th scope="col" class="px-6 py-3 text-center">Ações</th>
@@ -332,6 +369,11 @@
             const extravioMotoristaCountEl = document.getElementById('extravio-motorista-count');
             const extravioBaseCountEl = document.getElementById('extravio-base-count');
 
+            // ATUALIZAÇÃO: Elementos do Filtro
+            const monthFilterEl = document.getElementById('month-filter');
+            const yearFilterEl = document.getElementById('year-filter');
+            const resetFilterBtn = document.getElementById('reset-filter-btn');
+
             const modal = document.getElementById('confirmation-modal');
             const notificationEl = document.getElementById('notification');
             const notificationMessageEl = document.getElementById('notification-message');
@@ -343,20 +385,15 @@
             function showNotification(message, isError = false) {
                 clearTimeout(notificationTimeout);
                 notificationMessageEl.textContent = message;
-                notificationEl.classList.remove('hidden', 'bg-red-500', 'bg-amber-500', 'bg-emerald-500'); // Limpa todas as cores
+                notificationEl.classList.remove('hidden', 'bg-red-500', 'bg-amber-500', 'bg-emerald-500', 'bg-sky-500'); // Limpa todas as cores
                 
                 let colorClass = 'bg-emerald-500'; // Sucesso padrão
                 if (isError) {
                     colorClass = 'bg-red-500'; // Erro
-                } else if (message.includes("Atenção:") || message.includes("atualizada")) {
-                     // Notificação de alerta (amarelo)
-                    if (message.includes("Atenção:")) {
-                         colorClass = 'bg-amber-500';
-                    }
-                    // Não mostra notificação verde para "lista atualizada"
-                    if (message.includes("atualizada")) {
-                        colorClass = 'bg-sky-500'; // Um azul para info
-                    }
+                } else if (message.includes("Atenção:")) {
+                     colorClass = 'bg-amber-500'; // Alerta
+                } else if (message.includes("atualizada") || message.includes("Filtro redefinido")) {
+                     colorClass = 'bg-sky-500'; // Info
                 }
 
                 notificationEl.classList.add(colorClass); 
@@ -444,9 +481,29 @@
                 
                 // Usa os dados passados para renderizar
                 if (!data) data = { files: [], solvedCount: 0 };
+
+                // ATUALIZAÇÃO: Lógica de Filtro de Data
+                const monthFilter = monthFilterEl.value;
+                const yearFilter = yearFilterEl.value;
+
+                const filteredFiles = data.files.filter(file => {
+                    // Ignora arquivos sem data (embora não deva acontecer)
+                    if (!file.uploadDate) return false; 
+                    
+                    const fileDate = new Date(file.uploadDate);
+                    const fileMonth = fileDate.getMonth();
+                    const fileYear = fileDate.getFullYear();
+
+                    const yearMatch = (yearFilter === 'all') || (fileYear === parseInt(yearFilter));
+                    const monthMatch = (monthFilter === 'all') || (fileMonth === parseInt(monthFilter));
+
+                    return yearMatch && monthMatch;
+                });
+                // FIM DA ATUALIZAÇÃO DE FILTRO
                 
                 // Lógica de verificação de status (vencidos)
-                data.files.forEach(file => {
+                // ATUALIZAÇÃO: Usa 'filteredFiles'
+                filteredFiles.forEach(file => {
                     if ((file.status === 'pending' || file.status === 'impresso') && now > file.deadline) {
                         file.status = 'expired';
                         needsStatusUpdate = true;
@@ -463,11 +520,12 @@
                 let alertCount = 0;
 
                 // Filtra os arquivos
-                const pendingFiles = data.files.filter(f => f.status === 'pending');
-                const printedFiles = data.files.filter(f => f.status === 'impresso');
-                const expiredFiles = data.files.filter(f => f.status === 'expired');
-                const extravioMotoristaFiles = data.files.filter(f => f.status === 'extravio_motorista');
-                const extravioBaseFiles = data.files.filter(f => f.status === 'extravio_base');
+                // ATUALIZAÇÃO: Mudar 'data.files' para 'filteredFiles'
+                const pendingFiles = filteredFiles.filter(f => f.status === 'pending');
+                const printedFiles = filteredFiles.filter(f => f.status === 'impresso');
+                const expiredFiles = filteredFiles.filter(f => f.status === 'expired');
+                const extravioMotoristaFiles = filteredFiles.filter(f => f.status === 'extravio_motorista');
+                const extravioBaseFiles = filteredFiles.filter(f => f.status === 'extravio_base');
 
                 // Renderiza Tabela Pendentes
                 if (pendingFiles.length === 0) {
@@ -528,6 +586,8 @@
 
                 // Salva automaticamente se o status de um arquivo mudou (ex: 'expired')
                 if (needsStatusUpdate) {
+                    // A referência do objeto foi modificada em 'filteredFiles',
+                    // então salvar 'AppState' (que contém 'data.files') está correto.
                     AppState = data; // Atualiza o estado global
                     saveData(AppState); 
                 }
@@ -765,7 +825,8 @@
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             const newFile = {
-                                id: (uploadTimestamp + i).toString(), // ID único para o lote
+                                // id: (uploadTimestamp + i).toString(), // ID único para o lote (BUG ESTAVA AQUI)
+                                id: crypto.randomUUID(), // ID verdadeiramente único
                                 fileName: pdfFile.name,
                                 folderName: folderName,
                                 uploadDate: uploadTimestamp,
@@ -809,6 +870,7 @@
                 }
             });
 
+            // ATUALIZAÇÃO: Adicionando de volta o listener de clique principal
             document.body.addEventListener('click', async (event) => {
                 const button = event.target.closest('button');
                 if (!button) return;
@@ -820,8 +882,13 @@
                 
                 // Ações que não modificam dados (view, download)
                 if (button.classList.contains('view-btn') || button.classList.contains('download-btn')) {
+                    // Usamos o AppState local para 'view' e 'download'
+                    // pois eles não modificam dados e são mais rápidos
                     const file = AppState.files.find(f => f.id === fileId);
-                    if (!file) return;
+                    if (!file) {
+                        showNotification("Arquivo não encontrado no estado local.", true);
+                        return;
+                    }
 
                     if (button.classList.contains('view-btn')) {
                         const pdfWindow = window.open("");
@@ -843,7 +910,8 @@
                     return; // Não precisa salvar/buscar
                 }
 
-                // Ações que MODIFICAM dados
+                // --- Ações que MODIFICAM dados ---
+                // Sempre busca os dados mais recentes antes de modificar
                 
                 // 1. BUSCA dados frescos
                 const currentData = await getLatestData();
@@ -854,7 +922,7 @@
 
                 const fileIndex = currentData.files.findIndex(f => f.id === fileId);
                 if (fileIndex === -1) {
-                    showNotification("Arquivo não encontrado. A lista foi atualizada.", true);
+                    showNotification("Arquivo não encontrado no servidor. A lista foi atualizada.", true);
                     AppState = currentData;
                     render(AppState);
                     return;
@@ -922,6 +990,82 @@
                 }
             });
 
+            // ATUALIZAÇÃO: Função para configurar os filtros
+            function setupFilters() {
+                const now = new Date();
+                const currentMonth = now.getMonth(); // 0-11
+                const currentYear = now.getFullYear();
+
+                // 1. Popula o <select> de Ano (ex: 2024 até o ano atual + 1)
+                // Limpa opções antigas, exceto a "Todos os Anos"
+                while (yearFilterEl.options.length > 1) {
+                    yearFilterEl.remove(1);
+                }
+                
+                const startYear = 2024;
+                // Garante que o ano atual esteja sempre na lista, mesmo que seja 2023
+                const endYear = Math.max(currentYear, startYear) + 1;
+                
+                let allYears = new Set();
+                if(AppState.files) {
+                    AppState.files.forEach(f => {
+                         if(f.uploadDate) {
+                            allYears.add(new Date(f.uploadDate).getFullYear());
+                         }
+                    });
+                }
+                allYears.add(startYear);
+                allYears.add(currentYear);
+                allYears.add(currentYear + 1);
+                
+                const sortedYears = Array.from(allYears).sort((a,b) => a - b);
+                
+                sortedYears.forEach(year => {
+                    const option = new Option(year, year);
+                    yearFilterEl.add(option);
+                });
+
+
+                // 2. Define os valores padrão (Mês/Ano Atual)
+                monthFilterEl.value = currentMonth;
+                yearFilterEl.value = currentYear;
+
+                // 3. Adiciona listeners
+                monthFilterEl.addEventListener('change', () => render(AppState));
+                yearFilterEl.addEventListener('change', () => render(AppState));
+                
+                resetFilterBtn.addEventListener('click', () => {
+                    // Recalcula a data atual AO CLICAR
+                    const now = new Date();
+                    const month = now.getMonth();
+                    const year = now.getFullYear();
+                    
+                    monthFilterEl.value = month;
+
+                    // Adiciona o ano atual se ele não existir na lista (ex: 1º de Janeiro de um novo ano)
+                    let yearExists = false;
+                    for (let i = 0; i < yearFilterEl.options.length; i++) {
+                        if (yearFilterEl.options[i].value == year) {
+                            yearExists = true;
+                            break;
+                        }
+                    }
+                    if (!yearExists) {
+                         const option = new Option(year, year);
+                         yearFilterEl.add(option);
+                         // Re-sort
+                         let opts = Array.from(yearFilterEl.options);
+                         opts.sort((a, b) => (a.value === 'all' ? -Infinity : a.text) - (b.value === 'all' ? -Infinity : b.text));
+                         yearFilterEl.innerHTML = '';
+                         opts.forEach(o => yearFilterEl.add(o));
+                    }
+                    yearFilterEl.value = year; // Garante que está selecionado
+
+                    render(AppState);
+                    showNotification(`Filtro redefinido para o mês atual (${month + 1}/${year}).`);
+                });
+            }
+
             // --- Inicialização da aplicação ---
             
             // Função para iniciar a busca inicial
@@ -929,11 +1073,15 @@
                 const initialData = await getLatestData();
                 if (initialData) {
                     AppState = initialData;
-                    render(AppState); // Renderiza os dados iniciais
+                    // ATUALIZAÇÃO: Configura os filtros ANTES da primeira renderização
+                    setupFilters(); 
+                    render(AppState); // Renderiza os dados iniciais (já filtrados)
                 } else {
                     // Falha ao carregar, esconde o spinner mesmo assim
                     if (loadingEl) loadingEl.style.display = 'none';
                     showNotification("Falha ao carregar dados iniciais.", true);
+                    setupFilters(); // Configura filtros mesmo se falhar, para a UI não ficar quebrada
+                    render(AppState); // Renderiza estado vazio
                 }
                 startAutoUpdate(); // Inicia o poller DEPOIS da carga inicial
             }
@@ -947,11 +1095,40 @@
                     const data = await getLatestData();
                     if (data) {
                         // Compara simplisticamente para ver se algo mudou
-                        if (JSON.stringify(data) !== JSON.stringify(AppState)) {
-                            AppState = data;
+                        const dataChanged = JSON.stringify(data) !== JSON.stringify(AppState);
+                        
+                        // Verifica se os anos mudaram, para atualizar o filtro
+                        const oldYears = new Set(AppState.files.map(f => f.uploadDate ? new Date(f.uploadDate).getFullYear() : null));
+                        const newYears = new Set(data.files.map(f => f.uploadDate ? new Date(f.uploadDate).getFullYear() : null));
+                        
+                        let yearsChanged = oldYears.size !== newYears.size;
+                        if (!yearsChanged) {
+                             oldYears.forEach(y => {
+                                if(y && !newYears.has(y)) yearsChanged = true;
+                             });
+                        }
+                        
+                        AppState = data;
+
+                        if (yearsChanged) {
+                             // Salva seleção atual
+                            const currentMonth = monthFilterEl.value;
+                            const currentYear = yearFilterEl.value;
+                            // Re-popula anos
+                            setupFilters(); 
+                            // Restaura seleção
+                            monthFilterEl.value = currentMonth;
+                            yearFilterEl.value = currentYear;
+                        }
+
+                        if (dataChanged) {
                             render(AppState);
                             // Notificação de atualização (não erro)
                             showNotification("Lista atualizada automaticamente.", false);
+                        } else {
+                            // Mesmo que os dados não tenham mudado, re-renderiza
+                            // para atualizar status de "Expirando" em tempo real
+                            render(AppState);
                         }
                     }
                 }, 30000); // 30 segundos
