@@ -133,7 +133,7 @@
             </div>
         </div>
 
-        <!-- ATUALIZAÇÃO: Filtros de Data -->
+        <!-- Filtros de Data -->
         <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200 mb-8 flex flex-col sm:flex-row gap-4 items-center">
             <h3 class="text-lg font-semibold text-slate-700 whitespace-nowrap">Filtrar por Data:</h3>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
@@ -181,13 +181,11 @@
                             <th scope="col" class="px-6 py-3">Pasta</th>
                             <th scope="col" class="px-6 py-3">Prazo Final</th>
                             <th scope="col" class="px-6 py-3">Status</th>
-                            <!-- Coluna Adicionada -->
                             <th scope="col" class="px-6 py-3">Notif. Wpp</th>
                             <th scope="col" class="px-6 py-3 text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="file-list" class="divide-y divide-slate-200">
-                        <!-- Colspan atualizado para 6 -->
                         <tr id="empty-state-pending"><td colspan="6" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>
                     </tbody>
                 </table>
@@ -295,9 +293,7 @@
                     <input type="time" id="upload-time" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
                 </div>
                 <div>
-                    <!-- ATUALIZAÇÃO 1: Label alterada -->
                     <label for="pdf-file-input" class="block w-full text-sm font-medium text-slate-700 mb-1">Selecione os arquivos PDF (múltiplos)</label>
-                    <!-- ATUALIZAÇÃO 2: Adicionado 'multiple' -->
                     <input type="file" id="pdf-file-input" accept=".pdf" required multiple class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                 </div>
                  <button type="submit" id="submit-button" class="w-full sm:w-auto bg-indigo-600 text-white font-bold py-2 px-6 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 flex items-center justify-center space-x-2">
@@ -305,7 +301,6 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <!-- ATUALIZAÇÃO 3: Texto do botão alterado (mas será controlado por JS) -->
                     <span id="submit-text">Subir Arquivo(s)</span>
                 </button>
             </form>
@@ -369,7 +364,6 @@
             const extravioMotoristaCountEl = document.getElementById('extravio-motorista-count');
             const extravioBaseCountEl = document.getElementById('extravio-base-count');
 
-            // ATUALIZAÇÃO: Elementos do Filtro
             const monthFilterEl = document.getElementById('month-filter');
             const yearFilterEl = document.getElementById('year-filter');
             const resetFilterBtn = document.getElementById('reset-filter-btn');
@@ -390,7 +384,7 @@
                 let colorClass = 'bg-emerald-500'; // Sucesso padrão
                 if (isError) {
                     colorClass = 'bg-red-500'; // Erro
-                } else if (message.includes("Atenção:")) {
+                } else if (message.includes("Atenção:") || message.includes("Reparando")) {
                      colorClass = 'bg-amber-500'; // Alerta
                 } else if (message.includes("atualizada") || message.includes("Filtro redefinido")) {
                      colorClass = 'bg-sky-500'; // Info
@@ -434,29 +428,25 @@
 
             // --- Funções de Dados (GET e PUT) ---
             
-            // Função centralizada para BUSCAR dados
             async function getLatestData() {
                 try {
-                    // Adiciona um parâmetro anti-cache para garantir dados frescos
                     const response = await fetch(`${DATABASE_URL}?_=${new Date().getTime()}`);
                     if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                     const data = await response.json();
-                    // Garante que a estrutura básica exista
                     if (!data.files) data.files = [];
                     if (!data.solvedCount) data.solvedCount = 0;
                     return data;
                 } catch (error) {
                     console.error("Erro ao buscar dados:", error);
                     showNotification("Não foi possível carregar os dados. Verifique sua conexão.", true);
-                    return null; // Retorna nulo em caso de erro
+                    return null; 
                 }
             }
             
-            // Função centralizada para SALVAR dados
             async function saveData(dataToSave) {
-                if (isSaving) return; // Previne salvamentos múltiplos
+                if (isSaving) return false; // CORREÇÃO: Retorna falha se já estiver salvando
                 isSaving = true;
-                clearInterval(autoUpdateInterval); // Pausa a atualização automática
+                clearInterval(autoUpdateInterval); 
 
                 try {
                     const response = await fetch(DATABASE_URL, {
@@ -465,12 +455,14 @@
                         body: JSON.stringify(dataToSave)
                     });
                     if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                    return true; // CORREÇÃO: Retorna sucesso
                 } catch (error) {
-                    console.error("Erro ao salvar dados:", error);
+                    console.error("Erro ao salvar dados:", error); 
                     showNotification("Ocorreu um erro ao salvar as alterações.", true);
+                    return false; // CORREÇÃO: Retorna falha
                 } finally {
-                    isSaving = false; // Libera o flag
-                    startAutoUpdate(); // Reinicia a atualização automática
+                    isSaving = false; 
+                    startAutoUpdate(); 
                 }
             }
             
@@ -479,15 +471,12 @@
                 const now = new Date().getTime();
                 let needsStatusUpdate = false;
                 
-                // Usa os dados passados para renderizar
                 if (!data) data = { files: [], solvedCount: 0 };
 
-                // ATUALIZAÇÃO: Lógica de Filtro de Data
                 const monthFilter = monthFilterEl.value;
                 const yearFilter = yearFilterEl.value;
 
                 const filteredFiles = data.files.filter(file => {
-                    // Ignora arquivos sem data (embora não deva acontecer)
                     if (!file.uploadDate) return false; 
                     
                     const fileDate = new Date(file.uploadDate);
@@ -499,10 +488,7 @@
 
                     return yearMatch && monthMatch;
                 });
-                // FIM DA ATUALIZAÇÃO DE FILTRO
                 
-                // Lógica de verificação de status (vencidos)
-                // ATUALIZAÇÃO: Usa 'filteredFiles'
                 filteredFiles.forEach(file => {
                     if ((file.status === 'pending' || file.status === 'impresso') && now > file.deadline) {
                         file.status = 'expired';
@@ -510,7 +496,6 @@
                     }
                 });
                 
-                // Limpa as listas
                 pendingFileList.innerHTML = '';
                 printedFileList.innerHTML = '';
                 expiredFileList.innerHTML = '';
@@ -519,8 +504,6 @@
 
                 let alertCount = 0;
 
-                // Filtra os arquivos
-                // ATUALIZAÇÃO: Mudar 'data.files' para 'filteredFiles'
                 const pendingFiles = filteredFiles.filter(f => f.status === 'pending');
                 const printedFiles = filteredFiles.filter(f => f.status === 'impresso');
                 const expiredFiles = filteredFiles.filter(f => f.status === 'expired');
@@ -537,7 +520,6 @@
                         if (isAlerting) {
                             alertCount++;
                             if (!file.alertNotified) {
-                                // Mostra notificação de alerta (não erro)
                                 showNotification(`Atenção: O documento '${file.fileName}' está prestes a vencer!`, false);
                                 file.alertNotified = true;
                                 needsStatusUpdate = true;
@@ -575,7 +557,6 @@
                     extravioBaseFiles.sort((a, b) => b.uploadDate - a.uploadDate).forEach(file => extravioBaseList.insertAdjacentHTML('beforeend', createExtravioBaseRow(file)));
                 }
                 
-                // Atualiza contadores
                 pendingCountEl.textContent = pendingFiles.length;
                 printedCountEl.textContent = printedFiles.length;
                 alertCountEl.textContent = alertCount;
@@ -584,15 +565,11 @@
                 extravioMotoristaCountEl.textContent = extravioMotoristaFiles.length;
                 extravioBaseCountEl.textContent = extravioBaseFiles.length;
 
-                // Salva automaticamente se o status de um arquivo mudou (ex: 'expired')
                 if (needsStatusUpdate) {
-                    // A referência do objeto foi modificada em 'filteredFiles',
-                    // então salvar 'AppState' (que contém 'data.files') está correto.
-                    AppState = data; // Atualiza o estado global
+                    AppState = data; 
                     saveData(AppState); 
                 }
                 
-                // Esconde o loading inicial
                 if (loadingEl) {
                     loadingEl.style.display = 'none';
                 }
@@ -600,20 +577,18 @@
 
             // --- Funções de Criação de Linhas ---
             
-            // ATUALIZADA: createPendingRow agora inclui a coluna de status do WhatsApp
             function createPendingRow(file, isAlerting) {
                 const deadlineFormatted = new Date(file.deadline).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
                 const statusClass = isAlerting ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800';
                 const statusText = isAlerting ? 'Expirando' : 'Pendente';
 
-                // Lógica para o status do WhatsApp
                 const wppNotified = file.whatsappNotified === 'yes';
                 const wppStatusText = wppNotified ? 'Sim' : 'Não';
                 const wppStatusClass = wppNotified ? 'text-green-600' : 'text-red-600';
                 const wppBtnTitle = wppNotified ? 'Marcar como Não Notificado' : 'Marcar como Notificado (Sim)';
                 const wppBtnIcon = wppNotified ? 
-                    `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>` : // Check circle
-                    `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>`; // X circle
+                    `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>` :
+                    `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>`; 
 
                 return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
                             <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap" title="${file.fileName}">${file.fileName}</td>
@@ -621,7 +596,6 @@
                             <td class="px-6 py-4">${deadlineFormatted}</td>
                             <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">${statusText}</span></td>
                             
-                            <!-- Coluna Adicionada -->
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-center space-x-2">
                                     <span class="font-medium ${wppStatusClass}">${wppStatusText}</span>
@@ -761,15 +735,13 @@
                 });
                 if (!confirmed) return;
                 
-                // Cria um estado vazio e salva
                 const emptyData = { files: [], solvedCount: 0 };
                 AppState = emptyData;
                 await saveData(AppState);
-                render(AppState); // Renderiza o novo estado vazio
+                render(AppState); 
                 showNotification('Todos os dados foram limpos com sucesso!');
             });
 
-            // ATUALIZAÇÃO 4: Lógica de submit totalmente refeita para envio em massa
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 
@@ -787,7 +759,7 @@
 
                 const folderName = folderInput.value.trim();
                 const uploadTime = timeInput.value.trim();
-                const pdfFiles = fileInput.files; // É uma FileList
+                const pdfFiles = fileInput.files; 
 
                 if (pdfFiles.length === 0 || !uploadTime || !folderName) {
                     showNotification("Por favor, preencha todos os campos e selecione pelo menos um arquivo.", true);
@@ -803,7 +775,6 @@
                     return;
                 }
 
-                // 1. Validar todos os arquivos PRIMEIRO
                 const failedSizeFiles = [];
                 for (let i = 0; i < pdfFiles.length; i++) {
                     if (pdfFiles[i].size > 1024 * 1024) { // 1MB limit
@@ -817,7 +788,6 @@
                     return;
                 }
 
-                // 2. Processar todos os arquivos em paralelo
                 const fileReadPromises = [];
                 for (let i = 0; i < pdfFiles.length; i++) {
                     const pdfFile = pdfFiles[i];
@@ -825,15 +795,14 @@
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             const newFile = {
-                                // id: (uploadTimestamp + i).toString(), // ID único para o lote (BUG ESTAVA AQUI)
                                 id: crypto.randomUUID(), // ID verdadeiramente único
                                 fileName: pdfFile.name,
                                 folderName: folderName,
                                 uploadDate: uploadTimestamp,
                                 deadline: uploadTimestamp + (24 * 60 * 60 * 1000), // 24h
                                 status: 'pending', 
-                                fileURL: e.target.result, // Base64 data URL
-                                whatsappNotified: 'no' // Propriedade Adicionada
+                                fileURL: e.target.result, 
+                                whatsappNotified: 'no' 
                             };
                             resolve(newFile);
                         };
@@ -843,11 +812,9 @@
                     fileReadPromises.push(promise);
                 }
 
-                // 3. Esperar que todos sejam lidos e depois salvar
                 try {
                     const processedFiles = await Promise.all(fileReadPromises);
                     
-                    // BUSCA antes de modificar
                     const currentData = await getLatestData();
                     if (!currentData) {
                         showNotification("Erro de conexão ao salvar. Tente novamente.", true);
@@ -855,11 +822,16 @@
                         return;
                     }
 
-                    currentData.files.push(...processedFiles); // Adiciona todos os novos arquivos
-                    AppState = currentData; // Atualiza o estado local
+                    currentData.files.push(...processedFiles); 
+                    AppState = currentData; 
 
                     await saveData(AppState);
-                    render(AppState); // Renderiza o novo estado
+                    
+                    // CORREÇÃO: Chamar setupFilters DEPOIS de salvar e ANTES de renderizar
+                    // para garantir que o filtro de ano seja atualizado se um novo ano for introduzido.
+                    setupFilters();
+                    
+                    render(AppState); 
                     showNotification(`${processedFiles.length} arquivo(s) enviado(s) com sucesso!`);
                     form.reset();
                     resetSubmitButton();
@@ -870,7 +842,6 @@
                 }
             });
 
-            // ATUALIZAÇÃO: Adicionando de volta o listener de clique principal
             document.body.addEventListener('click', async (event) => {
                 const button = event.target.closest('button');
                 if (!button) return;
@@ -880,10 +851,7 @@
 
                 const fileId = row.dataset.id;
                 
-                // Ações que não modificam dados (view, download)
                 if (button.classList.contains('view-btn') || button.classList.contains('download-btn')) {
-                    // Usamos o AppState local para 'view' e 'download'
-                    // pois eles não modificam dados e são mais rápidos
                     const file = AppState.files.find(f => f.id === fileId);
                     if (!file) {
                         showNotification("Arquivo não encontrado no estado local.", true);
@@ -907,13 +875,11 @@
                         link.click();
                         document.body.removeChild(link);
                     }
-                    return; // Não precisa salvar/buscar
+                    return; 
                 }
 
                 // --- Ações que MODIFICAM dados ---
-                // Sempre busca os dados mais recentes antes de modificar
                 
-                // 1. BUSCA dados frescos
                 const currentData = await getLatestData();
                 if (!currentData) {
                     showNotification("Erro de conexão. Sua ação não foi salva. Tente novamente.", true);
@@ -931,7 +897,6 @@
                 let needsSave = false;
                 let notificationMessage = '';
                 
-                // 2. MODIFICA os dados frescos
                 if (button.classList.contains('print-btn')) {
                     currentData.files[fileIndex].status = 'impresso';
                     needsSave = true;
@@ -971,40 +936,33 @@
                     needsSave = true;
                     notificationMessage = 'Movido para Extravio Base.';
                 }
-                // Handler Adicionado
                 else if (button.classList.contains('whatsapp-toggle-btn')) {
                     const file = currentData.files[fileIndex];
-                    file.whatsappNotified = file.whatsappNotified === 'yes' ? 'no' : 'yes'; // Alterna
+                    file.whatsappNotified = file.whatsappNotified === 'yes' ? 'no' : 'yes'; 
                     needsSave = true;
                     notificationMessage = `Status do WhatsApp atualizado para '${file.whatsappNotified === 'yes' ? 'Sim' : 'Não'}'.`;
                 }
 
-                // 3. SALVA e RENDERIZA se algo mudou
                 if (needsSave) {
-                    AppState = currentData; // Atualiza o estado local
-                    await saveData(AppState); // Salva os dados modificados
-                    render(AppState); // Re-renderiza imediatamente com o novo estado
+                    AppState = currentData; 
+                    await saveData(AppState); 
+                    render(AppState); 
                     if (notificationMessage) {
                         showNotification(notificationMessage);
                     }
                 }
             });
 
-            // ATUALIZAÇÃO: Função para configurar os filtros
             function setupFilters() {
                 const now = new Date();
-                const currentMonth = now.getMonth(); // 0-11
+                const currentMonth = now.getMonth(); 
                 const currentYear = now.getFullYear();
 
-                // 1. Popula o <select> de Ano (ex: 2024 até o ano atual + 1)
-                // Limpa opções antigas, exceto a "Todos os Anos"
                 while (yearFilterEl.options.length > 1) {
                     yearFilterEl.remove(1);
                 }
                 
                 const startYear = 2024;
-                // Garante que o ano atual esteja sempre na lista, mesmo que seja 2023
-                const endYear = Math.max(currentYear, startYear) + 1;
                 
                 let allYears = new Set();
                 if(AppState.files) {
@@ -1021,28 +979,33 @@
                 const sortedYears = Array.from(allYears).sort((a,b) => a - b);
                 
                 sortedYears.forEach(year => {
-                    const option = new Option(year, year);
-                    yearFilterEl.add(option);
+                    // Evita adicionar anos "NaN" se algum dado estiver corrompido
+                    if (year && !isNaN(year)) { 
+                        const option = new Option(year, year);
+                        yearFilterEl.add(option);
+                    }
                 });
 
-
-                // 2. Define os valores padrão (Mês/Ano Atual)
                 monthFilterEl.value = currentMonth;
-                yearFilterEl.value = currentYear;
+                // Garante que o ano atual exista como opção antes de tentar selecioná-lo
+                if (yearFilterEl.querySelector(`option[value="${currentYear}"]`)) {
+                    yearFilterEl.value = currentYear;
+                } else {
+                    // Se o ano atual não estiver na lista por algum motivo, seleciona "Todos"
+                    yearFilterEl.value = "all"; 
+                }
 
-                // 3. Adiciona listeners
+
                 monthFilterEl.addEventListener('change', () => render(AppState));
                 yearFilterEl.addEventListener('change', () => render(AppState));
                 
                 resetFilterBtn.addEventListener('click', () => {
-                    // Recalcula a data atual AO CLICAR
                     const now = new Date();
                     const month = now.getMonth();
                     const year = now.getFullYear();
                     
                     monthFilterEl.value = month;
 
-                    // Adiciona o ano atual se ele não existir na lista (ex: 1º de Janeiro de um novo ano)
                     let yearExists = false;
                     for (let i = 0; i < yearFilterEl.options.length; i++) {
                         if (yearFilterEl.options[i].value == year) {
@@ -1053,13 +1016,12 @@
                     if (!yearExists) {
                          const option = new Option(year, year);
                          yearFilterEl.add(option);
-                         // Re-sort
                          let opts = Array.from(yearFilterEl.options);
                          opts.sort((a, b) => (a.value === 'all' ? -Infinity : a.text) - (b.value === 'all' ? -Infinity : b.text));
                          yearFilterEl.innerHTML = '';
                          opts.forEach(o => yearFilterEl.add(o));
                     }
-                    yearFilterEl.value = year; // Garante que está selecionado
+                    yearFilterEl.value = year; 
 
                     render(AppState);
                     showNotification(`Filtro redefinido para o mês atual (${month + 1}/${year}).`);
@@ -1068,36 +1030,68 @@
 
             // --- Inicialização da aplicação ---
             
-            // Função para iniciar a busca inicial
             async function initializeApp() {
-                const initialData = await getLatestData();
+                let initialData = await getLatestData(); // Mudei para let
                 if (initialData) {
+                    
+                    // --- CORREÇÃO: SCRIPT DE REPARO DE ID ---
+                    let needsRepair = false;
+                    const idMap = new Map();
+                    initialData.files.forEach(file => {
+                        // Verifica se o ID não existe, é nulo, ou já foi visto
+                        if (!file.id || idMap.has(file.id)) { 
+                            console.warn(`Reparando ID do arquivo: ${file.fileName}`);
+                            file.id = crypto.randomUUID(); // Atribui um novo ID único
+                            needsRepair = true;
+                        } else {
+                            idMap.set(file.id, true);
+                        }
+                    });
+
+                    if (needsRepair) {
+                        console.log("IDs duplicados ou ausentes encontrados. Salvando dados reparados...");
+                        
+                        // CORREÇÃO: Verifica se o saveData teve sucesso
+                        const saveSuccess = await saveData(initialData); 
+                        
+                        if (saveSuccess) {
+                            showNotification("Reparo concluído! Recarregando...", false);
+                            setTimeout(() => {
+                               location.reload(); 
+                            }, 2000); // Espera 2s para a notificação ser vista
+                            
+                            return; // Para a execução atual
+                        } else {
+                            // CORREÇÃO: Se o save falhar (provavelmente DB muito grande),
+                            // notifica o usuário mas continua carregando o app
+                            // para quebrar o loop de recarregamento.
+                            showNotification("Falha ao salvar reparo (Banco de dados muito grande). Carregando app...", true);
+                            // Não retorna e não recarrega, continua para carregar o app.
+                        }
+                    }
+                    // --- FIM DO SCRIPT DE REPARO ---
+
                     AppState = initialData;
-                    // ATUALIZAÇÃO: Configura os filtros ANTES da primeira renderização
                     setupFilters(); 
-                    render(AppState); // Renderiza os dados iniciais (já filtrados)
+                    render(AppState); 
                 } else {
-                    // Falha ao carregar, esconde o spinner mesmo assim
                     if (loadingEl) loadingEl.style.display = 'none';
                     showNotification("Falha ao carregar dados iniciais.", true);
-                    setupFilters(); // Configura filtros mesmo se falhar, para a UI não ficar quebrada
-                    render(AppState); // Renderiza estado vazio
+                    setupFilters(); 
+                    render(AppState); 
                 }
-                startAutoUpdate(); // Inicia o poller DEPOIS da carga inicial
+                startAutoUpdate(); 
             }
             
-            // Função para iniciar/reiniciar o poller (atualização automática)
             function startAutoUpdate() {
-                clearInterval(autoUpdateInterval); // Limpa qualquer intervalo anterior
+                clearInterval(autoUpdateInterval); 
                 autoUpdateInterval = setInterval(async () => {
-                    if (isSaving) return; // Não atualiza se estiver salvando
+                    if (isSaving) return; 
 
                     const data = await getLatestData();
                     if (data) {
-                        // Compara simplisticamente para ver se algo mudou
                         const dataChanged = JSON.stringify(data) !== JSON.stringify(AppState);
                         
-                        // Verifica se os anos mudaram, para atualizar o filtro
                         const oldYears = new Set(AppState.files.map(f => f.uploadDate ? new Date(f.uploadDate).getFullYear() : null));
                         const newYears = new Set(data.files.map(f => f.uploadDate ? new Date(f.uploadDate).getFullYear() : null));
                         
@@ -1111,30 +1105,24 @@
                         AppState = data;
 
                         if (yearsChanged) {
-                             // Salva seleção atual
                             const currentMonth = monthFilterEl.value;
                             const currentYear = yearFilterEl.value;
-                            // Re-popula anos
                             setupFilters(); 
-                            // Restaura seleção
                             monthFilterEl.value = currentMonth;
                             yearFilterEl.value = currentYear;
                         }
 
                         if (dataChanged) {
                             render(AppState);
-                            // Notificação de atualização (não erro)
                             showNotification("Lista atualizada automaticamente.", false);
                         } else {
-                            // Mesmo que os dados não tenham mudado, re-renderiza
-                            // para atualizar status de "Expirando" em tempo real
                             render(AppState);
                         }
                     }
                 }, 30000); // 30 segundos
             }
             
-            initializeApp(); // Chama a função de inicialização
+            initializeApp(); 
         });
     </script>
 </body>
