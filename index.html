@@ -775,7 +775,7 @@ Obrigada!`;
                         <button class="print-btn text-slate-500 hover:text-green-600" title="Marcar Impresso">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
                         </button>
-                        ${getCommonActions()}
+                        ${getCommonActions(file.id)}
                     </td>
                 </tr>`;
             }
@@ -786,11 +786,7 @@ Obrigada!`;
                     <td class="px-6 py-4">${file.folderName}</td>
                     <td class="px-6 py-4"><span class="bg-sky-100 text-sky-800 px-2 py-1 rounded-full text-xs">Impresso</span></td>
                     <td class="px-6 py-4 flex justify-center gap-2">
-                        <button onclick="openNotifyModal('${file.id}')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs flex items-center gap-1 shadow-sm transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>
-                            Notificar
-                        </button>
-                        ${getCommonActions()}
+                        ${getCommonActions(file.id)}
                     </td>
                 </tr>`;
             }
@@ -809,10 +805,7 @@ Obrigada!`;
                         <span class="countdown-badge px-3 py-1 rounded font-bold text-xs shadow-sm border border-slate-200 block text-center w-24">Calculating...</span>
                     </td>
                     <td class="px-6 py-4 flex justify-center gap-2">
-                        <button onclick="openNotifyModal('${file.id}')" class="text-green-500 hover:text-green-700" title="Reenviar Msg">
-                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>
-                        </button>
-                        ${getCommonActions()}
+                        ${getCommonActions(file.id)}
                     </td>
                 </tr>`;
             }
@@ -824,7 +817,7 @@ Obrigada!`;
                     <td class="px-6 py-4">${file.folderName}</td>
                     <td class="px-6 py-4">${date}</td>
                     <td class="px-6 py-4"><span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Vencido</span></td>
-                    <td class="px-6 py-4 flex justify-center gap-2">${getCommonActions()}</td>
+                    <td class="px-6 py-4 flex justify-center gap-2">${getCommonActions(file.id)}</td>
                 </tr>`;
             }
 
@@ -834,12 +827,20 @@ Obrigada!`;
                 return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
                     <td class="px-4 py-3 font-medium text-slate-900 text-xs truncate max-w-xs" title="${file.fileName}">${file.fileName}</td>
                     <td class="px-4 py-3 text-xs">${date}</td>
-                    <td class="px-4 py-3 flex justify-center gap-2">${getCommonActions()}</td>
+                    <td class="px-4 py-3 flex justify-center gap-2">${getCommonActions(file.id)}</td>
                 </tr>`;
             }
 
-            function getCommonActions() {
+            function getCommonActions(fileId) {
                 return `
+                <!-- Notificar Motorista (Novo em todos) -->
+                <button onclick="openNotifyModal('${fileId}')" title="Notificar Motorista" class="text-purple-500 hover:text-purple-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>
+                </button>
+                <!-- Baixar (Restaurado) -->
+                <button title="Baixar" class="download-btn text-slate-400 hover:text-blue-600">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
                 <button title="Extravio Motorista" class="extravio-mot-btn text-slate-400 hover:text-orange-600">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 </button>
@@ -868,6 +869,20 @@ Obrigada!`;
                     if(file) {
                          const win = window.open();
                          win.document.write(`<iframe src="${file.fileURL}" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
+                    }
+                    return;
+                }
+                
+                // Função Download
+                if (button.classList.contains('download-btn')) {
+                    const file = AppState.files.find(f => f.id === fileId);
+                    if(file) {
+                        const link = document.createElement('a');
+                        link.href = file.fileURL;
+                        link.download = file.fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
                     }
                     return;
                 }
