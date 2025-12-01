@@ -56,55 +56,6 @@
         </div>
     </div>
 
-    <!-- Modal de Notificação do Motorista -->
-    <div id="driver-notify-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg mx-4">
-            <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                Notificar Motorista
-            </h3>
-            <p class="text-sm text-slate-500 mb-4">Preencha os dados abaixo para gerar a mensagem automática e iniciar a contagem regressiva.</p>
-            
-            <form id="notify-form" class="space-y-3">
-                <input type="hidden" id="notify-file-id">
-                <div>
-                    <label class="block text-xs font-medium text-slate-700">Nome do Motorista</label>
-                    <input type="text" id="notify-driver-name" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500" placeholder="Ex: João Silva">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-700">ID Pedido</label>
-                        <input type="text" id="notify-order-id" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500" placeholder="Ex: 123456">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-700">Site da Compra</label>
-                        <input type="text" id="notify-site" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500" placeholder="Ex: Shopee, Shein">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-700">Destinatário (Nome)</label>
-                    <input type="text" id="notify-recipient" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500" placeholder="Nome do Cliente">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-700">Endereço</label>
-                    <input type="text" id="notify-address" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500" placeholder="Rua, Bairro...">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-700">Telefone (Opcional - Apenas visual na msg)</label>
-                    <input type="text" id="notify-phone" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500" placeholder="(XX) 9XXXX-XXXX">
-                </div>
-            </form>
-
-            <div class="mt-6 flex justify-end space-x-3">
-                <button type="button" onclick="closeNotifyModal()" class="px-4 py-2 bg-slate-200 text-slate-800 rounded-md hover:bg-slate-300">Cancelar</button>
-                <button type="button" id="confirm-notify-btn" class="px-4 py-2 bg-green-600 text-white font-bold rounded-md hover:bg-green-700 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-                    Enviar e Iniciar Prazo
-                </button>
-            </div>
-        </div>
-    </div>
-
     <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
         <header class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
             <div>
@@ -225,12 +176,13 @@
                             <th scope="col" class="px-6 py-3">Nome do Arquivo</th>
                             <th scope="col" class="px-6 py-3">Pasta</th>
                             <th scope="col" class="px-6 py-3">Prazo Final</th>
+                            <th scope="col" class="px-6 py-3">Tempo Restante</th> <!-- ADICIONADO -->
                             <th scope="col" class="px-6 py-3">Status</th>
                             <th scope="col" class="px-6 py-3 text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="file-list" class="divide-y divide-slate-200">
-                        <tr id="empty-state-pending"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>
+                        <tr id="empty-state-pending"><td colspan="6" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -245,18 +197,19 @@
                         <tr>
                             <th scope="col" class="px-6 py-3">Nome do Arquivo</th>
                             <th scope="col" class="px-6 py-3">Pasta</th>
+                            <th scope="col" class="px-6 py-3">Tempo Restante</th> <!-- ADICIONADO -->
                             <th scope="col" class="px-6 py-3">Status</th>
                             <th scope="col" class="px-6 py-3 text-center">Ações (Notificar Motorista)</th>
                         </tr>
                     </thead>
                     <tbody id="printed-file-list" class="divide-y divide-slate-200">
-                        <tr id="empty-state-printed"><td colspan="4" class="text-center py-10 text-slate-500">Nenhum documento impresso.</td></tr>
+                        <tr id="empty-state-printed"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento impresso.</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- NOVO LISTA: Motorista Notificado -->
+        <!-- LISTA: Motorista Notificado -->
         <div class="bg-white rounded-lg shadow-md border border-purple-200 overflow-hidden mb-8">
             <div class="p-6 bg-purple-50 border-b border-purple-100 flex justify-between items-center">
                 <h2 class="text-xl font-bold text-purple-900">Motorista Notificado (Em Aguardo)</h2>
@@ -290,12 +243,13 @@
                             <th scope="col" class="px-6 py-3">Nome do Arquivo</th>
                             <th scope="col" class="px-6 py-3">Pasta</th>
                             <th scope="col" class="px-6 py-3">Data de Envio</th>
+                            <th scope="col" class="px-6 py-3">Tempo Restante</th> <!-- ADICIONADO -->
                             <th scope="col" class="px-6 py-3">Status</th>
                             <th scope="col" class="px-6 py-3 text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="expired-file-list" class="divide-y divide-slate-200">
-                         <tr id="empty-state-expired"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento vencido.</td></tr>
+                         <tr id="empty-state-expired"><td colspan="6" class="text-center py-10 text-slate-500">Nenhum documento vencido.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -402,7 +356,7 @@
             const timeInput = document.getElementById('upload-time');
             const submitButton = document.getElementById('submit-button');
             const clearDataBtn = document.getElementById('clear-data-btn');
-            const exportBtn = document.getElementById('export-btn'); // NOVO
+            const exportBtn = document.getElementById('export-btn');
             
             // Listas
             const pendingFileList = document.getElementById('file-list');
@@ -428,7 +382,6 @@
 
             // Modais
             const modal = document.getElementById('confirmation-modal');
-            const notifyModal = document.getElementById('driver-notify-modal');
             const notificationEl = document.getElementById('notification');
             const notificationMessageEl = document.getElementById('notification-message');
             
@@ -474,50 +427,13 @@
                 });
             }
 
-            // --- Lógica do Novo Modal de Notificação ---
+            // --- Lógica de Copiar e Notificar (Sem Modal) ---
 
-            window.openNotifyModal = function(fileId) {
-                const file = AppState.files.find(f => f.id === fileId);
-                if(!file) return;
-
-                document.getElementById('notify-file-id').value = fileId;
-                document.getElementById('notify-driver-name').value = '';
-                document.getElementById('notify-order-id').value = '';
-                document.getElementById('notify-site').value = '';
-                document.getElementById('notify-recipient').value = '';
-                document.getElementById('notify-address').value = '';
-                document.getElementById('notify-phone').value = '';
-
-                notifyModal.classList.remove('hidden');
-            }
-
-            window.closeNotifyModal = function() {
-                notifyModal.classList.add('hidden');
-            }
-
-            document.getElementById('confirm-notify-btn').addEventListener('click', async () => {
-                const fileId = document.getElementById('notify-file-id').value;
-                const driverName = document.getElementById('notify-driver-name').value;
-                const orderId = document.getElementById('notify-order-id').value;
-                const site = document.getElementById('notify-site').value;
-                const recipient = document.getElementById('notify-recipient').value;
-                const address = document.getElementById('notify-address').value;
-                const phone = document.getElementById('notify-phone').value;
-
-                if (!driverName || !orderId) {
-                    alert("Nome do motorista e ID do Pedido são obrigatórios.");
-                    return;
-                }
-
+            window.copyNotificationAndSetStatus = async function(fileId) {
                 const fileIndex = AppState.files.findIndex(f => f.id === fileId);
                 if(fileIndex === -1) return;
-
+                
                 const file = AppState.files[fileIndex];
-                file.status = 'driver_notified';
-                file.notificationData = {
-                    driverName, orderId, site, recipient, address, phone,
-                    notifiedAt: new Date().getTime()
-                };
 
                 // Formatar Data/Hora Limite
                 const deadlineDate = new Date(file.deadline);
@@ -526,17 +442,18 @@
                 const hour = String(deadlineDate.getHours()).padStart(2, '0');
                 const min = String(deadlineDate.getMinutes()).padStart(2, '0');
 
-                const message = `Olá ${driverName}, boa tarde!
+                // Modelo de Mensagem com Placeholders
+                const message = `Olá «Motorista», boa tarde!
 
 Tudo bem?
 
 Tem alguma atualização sobre a acareação do seguinte pedido?
 
-*1️⃣ Pedido: ${orderId} ACAREAÇÃO FÍSICA – ${site}*
+*1️⃣ Pedido: «ID Pedido» ACAREAÇÃO FÍSICA – «Site no qual a compra foi realizada»*
 
-👤 Destinatário: ${recipient} – ${address}
+👤 Destinatário: «Nome do titular da compra» – «Endereço»
 
-📞 ${phone}
+📞 «Telefone»
 
 
 *⚠️ Atenção: O prazo da acareação expira hoje (${day}/${month}) às ${hour}:${min}h. Caso não haja resposta, infelizmente será registrado como extravio em nome do motorista.*
@@ -545,15 +462,39 @@ Fico no aguardo.
 
 Obrigada!`;
 
-                const encodedMessage = encodeURIComponent(message);
-                const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+                // Tentar copiar para a área de transferência
+                try {
+                    // Método Fallback para iframes ou browsers antigos
+                    const textArea = document.createElement("textarea");
+                    textArea.value = message;
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-9999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    if (!successful) throw new Error('Falha ao copiar comando');
+                    
+                    // Atualizar Estado
+                    file.status = 'driver_notified';
+                    file.notificationData = {
+                        driverName: 'Pendente', 
+                        notifiedAt: new Date().getTime()
+                    };
 
-                await saveData(AppState);
-                render(AppState);
-                closeNotifyModal();
-                showNotification("Status atualizado! Abrindo WhatsApp...");
-                window.open(whatsappUrl, '_blank');
-            });
+                    await saveData(AppState);
+                    render(AppState);
+                    showNotification("Mensagem copiada e status atualizado!", false);
+
+                } catch (err) {
+                    console.error('Erro ao copiar', err);
+                    showNotification("Erro ao copiar mensagem. Tente novamente.", true);
+                }
+            }
+
 
             // --- EXPORTAR EXCEL/CSV (NOVO) ---
             exportBtn.addEventListener('click', () => {
@@ -571,10 +512,7 @@ Obrigada!`;
                     "Prazo Limite",
                     "Status Atual",
                     "Motorista Notificado",
-                    "Pedido (ID)",
-                    "Destinatário",
                     "Data da Notificação",
-                    "Telefone Motorista"
                 ];
 
                 // Mapeamento de Status
@@ -591,12 +529,10 @@ Obrigada!`;
                 const rows = AppState.files.map(file => {
                     const notify = file.notificationData || {};
                     
-                    // Tratamento de datas
                     const uploadDate = file.uploadDate ? new Date(file.uploadDate).toLocaleString('pt-BR') : '';
                     const deadline = file.deadline ? new Date(file.deadline).toLocaleString('pt-BR') : '';
                     const notifiedAt = notify.notifiedAt ? new Date(notify.notifiedAt).toLocaleString('pt-BR') : '';
 
-                    // Escapar aspas para CSV
                     const escape = (text) => `"${(text || '').toString().replace(/"/g, '""')}"`;
 
                     return [
@@ -607,17 +543,12 @@ Obrigada!`;
                         escape(deadline),
                         escape(statusMap[file.status] || file.status),
                         escape(notify.driverName),
-                        escape(notify.orderId),
-                        escape(notify.recipient),
                         escape(notifiedAt),
-                        escape(notify.phone)
-                    ].join(';'); // Ponto e vírgula é melhor para Excel no Brasil
+                    ].join(';'); 
                 });
 
-                // Montar Conteúdo (Com BOM para UTF-8 funcionar no Excel)
                 const csvContent = "\uFEFF" + headers.join(';') + "\n" + rows.join('\n');
                 
-                // Criar Blob e Baixar
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement("a");
@@ -672,7 +603,6 @@ Obrigada!`;
                 const now = new Date().getTime();
                 if (!data) data = { files: [], solvedCount: 0 };
 
-                // Filtro de Data
                 const monthFilter = monthFilterEl.value;
                 const yearFilter = yearFilterEl.value;
 
@@ -687,7 +617,6 @@ Obrigada!`;
                     return yearMatch && monthMatch;
                 });
 
-                // Limpar listas
                 pendingFileList.innerHTML = '';
                 printedFileList.innerHTML = '';
                 notifiedFileList.innerHTML = ''; 
@@ -695,7 +624,6 @@ Obrigada!`;
                 extravioMotoristaList.innerHTML = '';
                 extravioBaseList.innerHTML = '';
 
-                // Categorizar
                 const pendingFiles = [];
                 const printedFiles = [];
                 const notifiedFiles = []; 
@@ -706,7 +634,6 @@ Obrigada!`;
                 let needsUpdate = false;
 
                 filteredFiles.forEach(file => {
-                    // Verificação automática de vencimento
                     if ((file.status === 'pending' || file.status === 'impresso' || file.status === 'driver_notified') && now > file.deadline) {
                         file.status = 'expired';
                         needsUpdate = true;
@@ -720,29 +647,28 @@ Obrigada!`;
                     else if (file.status === 'extravio_base') extBaseFiles.push(file);
                 });
 
-                // Ordenar
                 const sortByDeadline = (a, b) => a.deadline - b.deadline;
                 pendingFiles.sort(sortByDeadline);
                 printedFiles.sort(sortByDeadline);
                 notifiedFiles.sort(sortByDeadline);
                 
-                // Renderizar Pendentes
-                if(pendingFiles.length === 0) pendingFileList.innerHTML = `<tr id="empty-state-pending"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>`;
+                // PENDENTES
+                if(pendingFiles.length === 0) pendingFileList.innerHTML = `<tr id="empty-state-pending"><td colspan="6" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>`;
                 else pendingFiles.forEach(f => pendingFileList.insertAdjacentHTML('beforeend', createPendingRow(f)));
 
-                // Renderizar Impressos
-                if(printedFiles.length === 0) printedFileList.innerHTML = `<tr id="empty-state-printed"><td colspan="4" class="text-center py-10 text-slate-500">Nenhum documento impresso.</td></tr>`;
+                // IMPRESSOS
+                if(printedFiles.length === 0) printedFileList.innerHTML = `<tr id="empty-state-printed"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento impresso.</td></tr>`;
                 else printedFiles.forEach(f => printedFileList.insertAdjacentHTML('beforeend', createPrintedRow(f)));
 
-                // Renderizar Notificados
+                // NOTIFICADOS
                 if(notifiedFiles.length === 0) notifiedFileList.innerHTML = `<tr id="empty-state-notified"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum motorista notificado.</td></tr>`;
                 else notifiedFiles.forEach(f => notifiedFileList.insertAdjacentHTML('beforeend', createNotifiedRow(f)));
 
-                // Renderizar Vencidos
-                if(expiredFiles.length === 0) expiredFileList.innerHTML = `<tr id="empty-state-expired"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento vencido.</td></tr>`;
+                // VENCIDOS
+                if(expiredFiles.length === 0) expiredFileList.innerHTML = `<tr id="empty-state-expired"><td colspan="6" class="text-center py-10 text-slate-500">Nenhum documento vencido.</td></tr>`;
                 else expiredFiles.forEach(f => expiredFileList.insertAdjacentHTML('beforeend', createExpiredRow(f)));
 
-                // Renderizar Extravios
+                // EXTRAVIOS
                 if(extMotFiles.length === 0) extravioMotoristaList.innerHTML = `<tr id="empty-state-extravio-motorista"><td colspan="3" class="text-center py-10 text-slate-500">Vazio.</td></tr>`;
                 else extMotFiles.forEach(f => extravioMotoristaList.insertAdjacentHTML('beforeend', createSimpleRow(f, 'orange')));
 
@@ -764,12 +690,19 @@ Obrigada!`;
 
             // --- Criação de Linhas HTML ---
 
+            function getCountdownCell(deadline) {
+                return `<td class="px-6 py-4">
+                        <span class="countdown-badge px-3 py-1 rounded font-bold text-xs shadow-sm border border-slate-200 block text-center w-24" data-target="${deadline}">Calc...</span>
+                    </td>`;
+            }
+
             function createPendingRow(file) {
                 const deadlineDate = new Date(file.deadline).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-                return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
+                return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}" data-deadline="${file.deadline}">
                     <td class="px-6 py-4 font-medium text-slate-900">${file.fileName}</td>
                     <td class="px-6 py-4">${file.folderName}</td>
                     <td class="px-6 py-4 text-xs font-bold text-slate-600">${deadlineDate}</td>
+                    ${getCountdownCell(file.deadline)}
                     <td class="px-6 py-4"><span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs">Pendente</span></td>
                     <td class="px-6 py-4 flex justify-center gap-2">
                         <button class="print-btn text-slate-500 hover:text-green-600" title="Marcar Impresso">
@@ -781,9 +714,10 @@ Obrigada!`;
             }
 
             function createPrintedRow(file) {
-                return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
+                return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}" data-deadline="${file.deadline}">
                     <td class="px-6 py-4 font-medium text-slate-900">${file.fileName}</td>
                     <td class="px-6 py-4">${file.folderName}</td>
+                    ${getCountdownCell(file.deadline)}
                     <td class="px-6 py-4"><span class="bg-sky-100 text-sky-800 px-2 py-1 rounded-full text-xs">Impresso</span></td>
                     <td class="px-6 py-4 flex justify-center gap-2">
                         ${getCommonActions(file.id)}
@@ -792,7 +726,7 @@ Obrigada!`;
             }
 
             function createNotifiedRow(file) {
-                const driverName = file.notificationData?.driverName || 'N/D';
+                const driverName = file.notificationData?.driverName || 'Pendente';
                 const notifiedAt = file.notificationData?.notifiedAt 
                     ? new Date(file.notificationData.notifiedAt).toLocaleString('pt-BR', {hour: '2-digit', minute:'2-digit', day: '2-digit', month: '2-digit'}) 
                     : '-';
@@ -801,9 +735,7 @@ Obrigada!`;
                     <td class="px-6 py-4 font-bold text-slate-800">${driverName}</td>
                     <td class="px-6 py-4 text-xs text-slate-500">${file.fileName}<br>${file.folderName}</td>
                     <td class="px-6 py-4 text-xs text-purple-700 font-medium">${notifiedAt}</td>
-                    <td class="px-6 py-4">
-                        <span class="countdown-badge px-3 py-1 rounded font-bold text-xs shadow-sm border border-slate-200 block text-center w-24">Calculating...</span>
-                    </td>
+                    ${getCountdownCell(file.deadline)}
                     <td class="px-6 py-4 flex justify-center gap-2">
                         ${getCommonActions(file.id)}
                     </td>
@@ -812,10 +744,11 @@ Obrigada!`;
 
             function createExpiredRow(file) {
                 const date = new Date(file.uploadDate).toLocaleDateString('pt-BR');
-                return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
+                return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}" data-deadline="${file.deadline}">
                     <td class="px-6 py-4 font-medium text-slate-900">${file.fileName}</td>
                     <td class="px-6 py-4">${file.folderName}</td>
                     <td class="px-6 py-4">${date}</td>
+                    ${getCountdownCell(file.deadline)}
                     <td class="px-6 py-4"><span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Vencido</span></td>
                     <td class="px-6 py-4 flex justify-center gap-2">${getCommonActions(file.id)}</td>
                 </tr>`;
@@ -833,11 +766,10 @@ Obrigada!`;
 
             function getCommonActions(fileId) {
                 return `
-                <!-- Notificar Motorista (Novo em todos) -->
-                <button onclick="openNotifyModal('${fileId}')" title="Notificar Motorista" class="text-purple-500 hover:text-purple-700">
+                <!-- Notificar Motorista (Automático - Copia Mensagem) -->
+                <button onclick="copyNotificationAndSetStatus('${fileId}')" title="Copiar Msg e Notificar" class="text-purple-500 hover:text-purple-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>
                 </button>
-                <!-- Baixar (Restaurado) -->
                 <button title="Baixar" class="download-btn text-slate-400 hover:text-blue-600">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                 </button>
@@ -926,13 +858,13 @@ Obrigada!`;
 
             // --- Lógica do Cronômetro ---
             setInterval(() => {
-                const rows = document.querySelectorAll('#notified-file-list tr');
+                // SELECIONA TODAS AS LINHAS QUE TÊM CRONÔMETRO AGORA
+                const badges = document.querySelectorAll('.countdown-badge');
                 const now = new Date().getTime();
 
-                rows.forEach(row => {
-                    const deadline = parseInt(row.dataset.deadline);
-                    const badge = row.querySelector('.countdown-badge');
-                    if(!deadline || !badge) return;
+                badges.forEach(badge => {
+                    const deadline = parseInt(badge.dataset.target);
+                    if(!deadline) return;
 
                     const diff = deadline - now;
                     
