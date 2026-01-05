@@ -271,7 +271,8 @@
         let authenticatedUser = null;
 
         // --- Referências de Caminhos ---
-        const getCollectionPath = () => collection(dbInstance, 'artifacts', appId, 'public', 'data', 'acareacoes');
+        // ATUALIZAÇÃO: Caminho alterado para acareacoesRelatórios
+        const getCollectionPath = () => collection(dbInstance, 'artifacts', appId, 'public', 'data', 'acareacoesRelatórios');
         const getStatsDocPath = () => doc(dbInstance, 'artifacts', appId, 'public', 'data', 'counters', 'global_stats');
 
         // --- Autenticação ---
@@ -434,14 +435,14 @@
                     const notifyTime = item.notificationData?.notifiedAt ? new Date(item.notificationData.notifiedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '-';
                     return `<tr>
                         <td class="px-6 py-4 font-bold text-slate-800 italic">Notificado às ${notifyTime}</td>
-                        <td class="px-6 py-4 text-xs font-medium">${item.fileName}<br><span class="text-slate-400 font-normal">${item.folderName}</span></td>
+                        <td class="px-6 py-4 text-sm font-medium break-words">${item.fileName}<br><span class="text-slate-400 font-normal">${item.folderName}</span></td>
                         <td class="px-6 py-4 text-center">${countdownHtml}</td>
                         <td class="px-6 py-4 text-center">${actionsHtml}</td>
                     </tr>`;
                 }
 
                 return `<tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-6 py-4 font-bold text-slate-700 truncate max-w-[200px]">${item.fileName}</td>
+                    <td class="px-6 py-4 font-bold text-slate-700 break-words">${item.fileName}</td>
                     <td class="px-6 py-4 text-slate-400 text-xs">${item.folderName}</td>
                     <td class="px-6 py-4 text-slate-500 font-bold text-xs">${deadlineLabel}</td>
                     <td class="px-6 py-4">${countdownHtml}</td>
@@ -449,7 +450,7 @@
                 </tr>`;
             };
 
-            const simpleRow = (item) => `<tr class="border-b"><td class="p-3 truncate max-w-[150px] font-medium text-slate-500">${item.fileName}</td><td class="p-3 text-center flex justify-center gap-4">
+            const simpleRow = (item) => `<tr class="border-b"><td class="p-3 break-words font-medium text-slate-500">${item.fileName}</td><td class="p-3 text-center flex justify-center gap-4">
                 <button onclick="viewAcareacaoPDF('${item.id}')" class="text-indigo-400">VER</button>
                 <button onclick="finishAcareacao('${item.id}')" class="text-emerald-500 font-bold">OK</button>
             </td></tr>`;
