@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Acareações</title>
+    <title>Painel de Controle de Acareações - JMSBR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* bg-slate-50 */
+            background-color: #f8fafc;
             overflow-x: hidden;
         }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -17,10 +17,9 @@
         ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
         #initial-loading {
-            position: fixed; inset: 0; background-color: rgba(248, 250, 252, 0.8);
-            display: flex; align-items: center; justify-content: center; z-index: 100;
+            position: fixed; inset: 0; background-color: rgba(248, 250, 252, 0.9);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100;
         }
-        /* Animação para o tempo restante */
         .pulse-red { animation: pulse-red 2s infinite; }
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
@@ -31,27 +30,28 @@
 </head>
 <body class="bg-slate-50">
 
-    <!-- Loading Inicial -->
+    <!-- Carregamento Inicial -->
     <div id="initial-loading">
-        <svg class="animate-spin h-10 w-10 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
+        <p class="text-slate-600 font-medium">A estabelecer ligação com a base de dados...</p>
     </div>
 
-    <!-- Elemento de Notificação -->
+    <!-- Notificações UI -->
     <div id="notification" class="hidden fixed top-5 right-5 z-50 p-4 rounded-md shadow-lg text-white transition-opacity duration-300 max-w-sm">
         <p id="notification-message"></p>
     </div>
 
-    <!-- Modal de Confirmação Genérico -->
+    <!-- Modal de Confirmação -->
     <div id="confirmation-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4 border border-slate-100">
             <h3 class="text-lg font-semibold text-slate-800" id="modal-title">Confirmar Ação</h3>
-            <p class="mt-2 text-sm text-slate-600" id="modal-message">Você tem certeza?</p>
+            <p class="mt-2 text-sm text-slate-600" id="modal-message">Tem a certeza desta operação?</p>
             <div class="mt-6 flex justify-end space-x-3">
-                <button id="modal-cancel-btn" class="px-4 py-2 bg-slate-200 text-slate-800 rounded-md hover:bg-slate-300">Cancelar</button>
-                <button id="modal-confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Confirmar</button>
+                <button id="modal-cancel-btn" class="px-4 py-2 bg-slate-200 text-slate-800 rounded-md hover:bg-slate-300 transition-colors">Cancelar</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-bold transition-colors shadow-sm">Confirmar</button>
             </div>
         </div>
     </div>
@@ -60,934 +60,524 @@
         <header class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
             <div>
                 <h1 class="text-3xl font-bold text-slate-800">Painel de Controle de Acareações</h1>
-                <p class="text-slate-600 mt-1">Acompanhe o status dos seus documentos em tempo real.</p>
+                <p class="text-slate-600 mt-1">Acompanhe o Status dos seus documentos em tempo real</p>
+                <p class="text-xs text-slate-400 mt-1">Status Cloud: <span id="db-status" class="text-emerald-600 font-bold italic font-mono">Ligado</span></p>
             </div>
             <div class="flex items-center space-x-4 md:space-x-6 mt-4 sm:mt-0">
-                <img src="https://www.jtexpress.com.br/mobile/static/png/leader_1-c3f7a853.png" alt="Logo J&T Express" class="h-16 w-auto" onerror="this.style.display='none'">
-                <img src="https://yl-pufile.jtexpress.ph/osbforever/YL_JMS_OFFICIAL_MANAGE/INFORMATION/20241104/1730704731890-1092-OurServices001.png" alt="Nova Logo J&T Express" class="h-16 w-auto" onerror="this.style.display='none'">
+                <img src="https://assets-v2.lottiefiles.com/a/c8344bce-116f-11ee-bbd9-eb38eca3030d/aoylhjYW1x.gif" alt="Logo Animado" class="h-20 w-auto rounded-lg shadow-sm" onerror="this.style.display='none'">
+                <img src="https://yl-pufile.jtexpress.ph/osbforever/YL_JMS_OFFICIAL_MANAGE/INFORMATION/20241104/1730704731890-1092-OurServices001.png" alt="Logo J&T Express" class="h-16 w-auto" onerror="this.style.display='none'">
             </div>
         </header>
 
-        <!-- Grade de Status -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 mb-8">
-             <!-- Pendentes -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col items-center text-center">
-                <div class="bg-indigo-100 rounded-full w-10 h-10 flex items-center justify-center mb-2">
-                    <svg class="h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                </div>
-                <h3 class="text-xs font-semibold text-slate-500 uppercase">Pendentes</h3>
+        <!-- Grade de Resumo -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8 text-center">
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase">Pendentes</h3>
                 <p id="pending-count" class="text-2xl font-bold text-indigo-600">0</p>
             </div>
-            <!-- Impressos -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col items-center text-center">
-                <div class="bg-sky-100 rounded-full w-10 h-10 flex items-center justify-center mb-2">
-                    <svg class="h-5 w-5 text-sky-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-1.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h4.5a2.25 2.25 0 012.25 2.25v.75" /></svg>
-                </div>
-                <h3 class="text-xs font-semibold text-slate-500 uppercase">Impressos</h3>
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase">Impressos</h3>
                 <p id="printed-count" class="text-2xl font-bold text-sky-600">0</p>
             </div>
-            <!-- Motorista Notificado -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-purple-200 flex flex-col items-center text-center ring-2 ring-purple-100">
-                <div class="bg-purple-100 rounded-full w-10 h-10 flex items-center justify-center mb-2">
-                    <svg class="h-5 w-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <h3 class="text-xs font-semibold text-slate-500 uppercase">Mot. Notificado</h3>
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-purple-200 ring-2 ring-purple-50">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase">Mot. Notificado</h3>
                 <p id="notified-count" class="text-2xl font-bold text-purple-600">0</p>
             </div>
-            <!-- Vencidos -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col items-center text-center">
-                <div class="bg-red-100 rounded-full w-10 h-10 flex items-center justify-center mb-2">
-                    <svg class="h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
-                </div>
-                <h3 class="text-xs font-semibold text-slate-500 uppercase">Vencidos</h3>
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase">Vencidos</h3>
                 <p id="expired-count" class="text-2xl font-bold text-red-600">0</p>
             </div>
-            <!-- Extravio Motorista -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col items-center text-center">
-                <div class="bg-orange-100 rounded-full w-10 h-10 flex items-center justify-center mb-2">
-                    <svg class="h-5 w-5 text-orange-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h.008v.008h-.008v-.008zm0 0H20.625a1.125 1.125 0 001.125-1.125V14.25m-17.25 4.5h14.25m-14.25 0V6.75a1.125 1.125 0 011.125-1.125h14.25a1.125 1.125 0 011.125 1.125v10.5m-17.25 4.5H3.375m17.25 0H20.625m0 0a1.125 1.125 0 001.125-1.125V6.75a1.125 1.125 0 00-1.125-1.125H3.375a1.125 1.125 0 00-1.125 1.125v10.5a1.125 1.125 0 001.125 1.125h.008m17.25 0h.008v.008h-.008v-.008zm0 0H20.625" /></svg>
-                </div>
-                <h3 class="text-xs font-semibold text-slate-500 uppercase">Extravio Mot.</h3>
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase">Ext. Motorista</h3>
                 <p id="extravio-motorista-count" class="text-2xl font-bold text-orange-600">0</p>
             </div>
-            <!-- Extravio Base -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col items-center text-center">
-                <div class="bg-teal-100 rounded-full w-10 h-10 flex items-center justify-center mb-2">
-                    <svg class="h-5 w-5 text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h6.75M9 11.25h6.75M9 15.75h6.75M5.25 6h.008v.008H5.25V6zm.008 4.5h.008v.008H5.25v-.008zm0 4.5h.008v.008H5.25v-.008zm13.5-9h.008v.008h-.008V6zm0 4.5h.008v.008h-.008v-.008zm0 4.5h.008v.008h-.008v-.008z" /></svg>
-                </div>
-                <h3 class="text-xs font-semibold text-slate-500 uppercase">Extravio Base</h3>
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase">Ext. Base</h3>
                 <p id="extravio-base-count" class="text-2xl font-bold text-teal-600">0</p>
             </div>
-            <!-- Solucionados -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col items-center text-center">
-                <div class="bg-emerald-100 rounded-full w-10 h-10 flex items-center justify-center mb-2">
-                    <svg class="h-5 w-5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                </div>
-                <h3 class="text-xs font-semibold text-slate-500 uppercase">Solucionados</h3>
+            <div class="bg-emerald-50 p-4 rounded-lg shadow-sm border border-emerald-200">
+                <h3 class="text-[10px] font-bold text-emerald-500 uppercase">Solucionados</h3>
                 <p id="solved-count" class="text-2xl font-bold text-emerald-600">0</p>
             </div>
         </div>
 
-        <!-- Filtros de Data -->
+        <!-- Filtros de Pesquisa -->
         <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200 mb-8 flex flex-col sm:flex-row gap-4 items-center">
-            <h3 class="text-lg font-semibold text-slate-700 whitespace-nowrap">Filtrar por Data:</h3>
+            <h3 class="text-sm font-bold text-slate-700 whitespace-nowrap uppercase">Filtrar por Data:</h3>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-                <div>
-                    <label for="month-filter" class="block text-sm font-medium text-slate-700">Mês</label>
-                    <select id="month-filter" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="all">Todos os Meses</option>
-                        <option value="0">Janeiro</option>
-                        <option value="1">Fevereiro</option>
-                        <option value="2">Março</option>
-                        <option value="3">Abril</option>
-                        <option value="4">Maio</option>
-                        <option value="5">Junho</option>
-                        <option value="6">Julho</option>
-                        <option value="7">Agosto</option>
-                        <option value="8">Setembro</option>
-                        <option value="9">Outubro</option>
-                        <option value="10">Novembro</option>
-                        <option value="11">Dezembro</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="year-filter" class="block text-sm font-medium text-slate-700">Ano</label>
-                    <select id="year-filter" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="all">Todos os Anos</option>
-                    </select>
-                </div>
-                <div class="sm:self-end">
-                    <button id="reset-filter-btn" class="w-full px-4 py-2 bg-slate-600 text-white rounded-md hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
-                        Mostrar Mês Atual
-                    </button>
-                </div>
+                <select id="month-filter" class="px-3 py-2 border border-slate-300 rounded-md bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="all">Todos os Meses</option>
+                    <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option><option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option><option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option><option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
+                </select>
+                <select id="year-filter" class="px-3 py-2 border border-slate-300 rounded-md bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <!-- Gerado por JS -->
+                </select>
+                <button id="reset-filter-btn" class="bg-slate-700 text-white px-4 py-2 rounded-md hover:bg-slate-800 text-sm font-bold transition-all">Limpar Filtros</button>
             </div>
         </div>
 
-        <!-- LISTA: Documentos Pendentes -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-8">
-            <h2 class="text-xl font-semibold text-slate-800 p-6">Documentos Pendentes</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-slate-600">
-                    <thead class="bg-slate-50 text-xs text-slate-700 uppercase">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">Nome do Arquivo</th>
-                            <th scope="col" class="px-6 py-3">Pasta</th>
-                            <th scope="col" class="px-6 py-3">Prazo Final</th>
-                            <th scope="col" class="px-6 py-3">Tempo Restante</th> <!-- ADICIONADO -->
-                            <th scope="col" class="px-6 py-3">Status</th>
-                            <th scope="col" class="px-6 py-3 text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="file-list" class="divide-y divide-slate-200">
-                        <tr id="empty-state-pending"><td colspan="6" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- LISTA: Documentos Impressos -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-8">
-            <h2 class="text-xl font-semibold text-slate-800 p-6 border-b border-slate-100">Documentos Impressos Aguardando Solução</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-slate-600">
-                    <thead class="bg-slate-50 text-xs text-slate-700 uppercase">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">Nome do Arquivo</th>
-                            <th scope="col" class="px-6 py-3">Pasta</th>
-                            <th scope="col" class="px-6 py-3">Tempo Restante</th> <!-- ADICIONADO -->
-                            <th scope="col" class="px-6 py-3">Status</th>
-                            <th scope="col" class="px-6 py-3 text-center">Ações (Notificar Motorista)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="printed-file-list" class="divide-y divide-slate-200">
-                        <tr id="empty-state-printed"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento impresso.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- LISTA: Motorista Notificado -->
-        <div class="bg-white rounded-lg shadow-md border border-purple-200 overflow-hidden mb-8">
-            <div class="p-6 bg-purple-50 border-b border-purple-100 flex justify-between items-center">
-                <h2 class="text-xl font-bold text-purple-900">Motorista Notificado (Em Aguardo)</h2>
-                <span class="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">Cronômetro Ativo</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-slate-600">
-                    <thead class="bg-purple-100 text-xs text-purple-900 uppercase">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">Motorista</th>
-                            <th scope="col" class="px-6 py-3">Arquivo / Pasta</th>
-                            <th scope="col" class="px-6 py-3">Notificado Em</th>
-                            <th scope="col" class="px-6 py-3">Tempo Restante</th>
-                            <th scope="col" class="px-6 py-3 text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="notified-file-list" class="divide-y divide-purple-100 bg-purple-50/30">
-                        <tr id="empty-state-notified"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum motorista notificado.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- LISTA: Vencidos -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-8">
-            <h2 class="text-xl font-semibold text-slate-800 p-6">Documentos Vencidos</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-slate-600">
-                    <thead class="bg-slate-50 text-xs text-slate-700 uppercase">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">Nome do Arquivo</th>
-                            <th scope="col" class="px-6 py-3">Pasta</th>
-                            <th scope="col" class="px-6 py-3">Data de Envio</th>
-                            <th scope="col" class="px-6 py-3">Tempo Restante</th> <!-- ADICIONADO -->
-                            <th scope="col" class="px-6 py-3">Status</th>
-                            <th scope="col" class="px-6 py-3 text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="expired-file-list" class="divide-y divide-slate-200">
-                         <tr id="empty-state-expired"><td colspan="6" class="text-center py-10 text-slate-500">Nenhum documento vencido.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- LISTAS DE EXTRAVIO (Motorista e Base) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-             <!-- Extravio Motorista -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-                <h2 class="text-xl font-semibold text-slate-800 p-6">Extravio Motorista</h2>
+        <!-- Listas de Documentos -->
+        <div class="space-y-12">
+            <!-- PENDENTES -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <h2 class="text-lg font-bold text-slate-800 p-6 bg-slate-50 border-b border-slate-100">Documentos Pendentes</h2>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-600">
-                        <thead class="bg-slate-50 text-xs text-slate-700 uppercase">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[10px] tracking-widest border-b">
                             <tr>
-                                <th scope="col" class="px-4 py-3">Arquivo</th>
-                                <th scope="col" class="px-4 py-3">Data</th>
-                                <th scope="col" class="px-4 py-3 text-center">Ações</th>
+                                <th class="px-6 py-4">Arquivo</th>
+                                <th class="px-6 py-4">Referência</th>
+                                <th class="px-6 py-4">Prazo Limite</th>
+                                <th class="px-6 py-4">Tempo Restante</th>
+                                <th class="px-6 py-4 text-center">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="extravio-motorista-list" class="divide-y divide-slate-200">
-                             <tr id="empty-state-extravio-motorista"><td colspan="3" class="text-center py-10 text-slate-500">Vazio.</td></tr>
-                        </tbody>
+                        <tbody id="file-list" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
-            </div>
-            <!-- Extravio Base -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-                <h2 class="text-xl font-semibold text-slate-800 p-6">Extravio Base</h2>
+            </section>
+
+            <!-- IMPRESSOS -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <h2 class="text-lg font-bold text-slate-800 p-6 bg-sky-50/20 border-b border-slate-100">Documentos Impressos</h2>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-600">
-                        <thead class="bg-slate-50 text-xs text-slate-700 uppercase">
+                    <table class="w-full text-sm text-left">
+                        <tbody id="printed-file-list" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- NOTIFICADOS -->
+            <section class="bg-white rounded-xl shadow-md border border-purple-200 overflow-hidden ring-1 ring-purple-100">
+                <div class="p-6 bg-purple-50 flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-purple-900">Motorista Notificado (Em Aguardo)</h2>
+                    <span class="text-[10px] bg-purple-200 text-purple-800 px-3 py-1 rounded-full uppercase font-bold">Monitorização Ativa</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-purple-100/50 text-purple-900 text-[10px] uppercase font-bold border-b border-purple-100">
                             <tr>
-                                <th scope="col" class="px-4 py-3">Arquivo</th>
-                                <th scope="col" class="px-4 py-3">Data</th>
-                                <th scope="col" class="px-4 py-3 text-center">Ações</th>
+                                <th class="px-6 py-4">Estado Notificação</th>
+                                <th class="px-6 py-4">Documento / Pasta</th>
+                                <th class="px-6 py-4 text-center">Tempo Restante</th>
+                                <th class="px-6 py-4 text-center">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="extravio-base-list" class="divide-y divide-slate-200">
-                             <tr id="empty-state-extravio-base"><td colspan="3" class="text-center py-10 text-slate-500">Vazio.</td></tr>
-                        </tbody>
+                        <tbody id="notified-file-list" class="divide-y divide-purple-100"></tbody>
                     </table>
+                </div>
+            </section>
+
+            <!-- VENCIDOS -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <h2 class="text-lg font-bold text-red-800 p-6 bg-red-50/50 border-b border-slate-100">Documentos Vencidos</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <tbody id="expired-file-list" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- EXTRAVIOS -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <h2 class="text-md font-bold text-slate-800 p-5 bg-orange-50 border-b border-slate-100">Extravio Motorista</h2>
+                    <table class="w-full text-sm text-left"><tbody id="extravio-motorista-list" class="divide-y"></tbody></table>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <h2 class="text-md font-bold text-slate-800 p-5 bg-teal-50 border-b border-slate-100">Extravio Base</h2>
+                    <table class="w-full text-sm text-left"><tbody id="extravio-base-list" class="divide-y"></tbody></table>
                 </div>
             </div>
         </div>
 
-        <!-- Seção para Adicionar Novo Documento -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h2 class="text-xl font-semibold text-slate-800 mb-4">Enviar Nova Acareação (PDF)</h2>
-             <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 mb-4 rounded-r-lg" role="alert">
-                 <p><strong>Atenção:</strong> Arquivos grandes (acima de 1MB) podem demorar para carregar ou causar erros.</p>
-             </div>
-            <form id="upload-form" class="space-y-4">
-                <div>
-                    <label for="folder-name" class="block text-sm font-medium text-slate-700 mb-1">Data do Envio</label>
-                    <input type="date" id="folder-name" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
+        <!-- Painel de Envio -->
+        <div class="mt-12 bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
+            <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Registo de Nova Acareação (PDF)
+            </h2>
+            <form id="upload-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Data de Emissão</label>
+                        <input type="date" id="folder-name" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Hora de Início (Contagem 24h)</label>
+                        <input type="time" id="upload-time" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required>
+                    </div>
                 </div>
-                <div>
-                    <label for="upload-time" class="block text-sm font-medium text-slate-700 mb-1">Horário do Envio (Prazo de 24h começa aqui)</label>
-                    <input type="time" id="upload-time" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
+                <div class="border-2 border-dashed border-slate-200 p-8 rounded-xl text-center hover:bg-slate-50 transition-all cursor-pointer relative">
+                    <input type="file" id="pdf-file-input" accept=".pdf" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                    <p class="text-indigo-600 font-bold">Clique ou arraste aqui os ficheiros PDF</p>
+                    <p class="mt-2 text-xs text-slate-400">Pode selecionar múltiplos documentos em simultâneo.</p>
                 </div>
-                <div>
-                    <label for="pdf-file-input" class="block w-full text-sm font-medium text-slate-700 mb-1">Selecione os arquivos PDF (múltiplos)</label>
-                    <input type="file" id="pdf-file-input" accept=".pdf" required multiple class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                </div>
-                 <button type="submit" id="submit-button" class="w-full sm:w-auto bg-indigo-600 text-white font-bold py-2 px-6 rounded-md hover:bg-indigo-700 flex items-center justify-center space-x-2">
-                    <svg id="submit-spinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    <span id="submit-text">Subir Arquivo(s)</span>
+                <button type="submit" id="submit-button" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-indigo-700 w-full flex items-center justify-center transition-all active:scale-95 shadow-md disabled:bg-slate-400">
+                    <svg id="submit-spinner" class="animate-spin h-5 w-5 text-white hidden mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span id="submit-text">Enviar para a Base de Dados Cloud</span>
                 </button>
             </form>
         </div>
 
-        <!-- Seção de Ações e Relatórios -->
-        <div class="mt-8 pt-6 border-t border-slate-200 text-center flex flex-col sm:flex-row justify-center gap-4">
-            <!-- Botão de Extrair Relatório (NOVO) -->
-            <button id="export-btn" class="bg-emerald-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-emerald-700 text-sm flex items-center justify-center space-x-2 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                <span>Baixar Relatório (Excel/CSV)</span>
+        <!-- Rodapé Administrativo -->
+        <div class="mt-12 py-10 border-t border-slate-200 flex flex-col sm:flex-row justify-center gap-6">
+            <button id="export-btn" class="bg-emerald-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-emerald-700 flex items-center shadow-md transition-all">
+                <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/></svg>
+                Extrair Relatório Geral (CSV)
             </button>
-            
-             <button id="clear-data-btn" class="bg-red-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-600 text-sm flex items-center justify-center space-x-2 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
-                <span>Limpar Todos os Dados</span>
+            <button id="clear-data-btn" class="bg-red-50 text-red-600 font-bold py-3 px-8 rounded-lg hover:bg-red-600 hover:text-white transition-all border border-red-200 shadow-sm">
+                Limpar Registos Ativos
             </button>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    <!-- FIREBASE SDK v11 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, query, setDoc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-            // --- CONFIGURAÇÃO DO BANCO ---
-            const DATABASE_URL = "https://api.npoint.io/ef789e8a4e2cd9900cf7"; 
-            
-            // --- Variáveis Globais ---
-            let AppState = { files: [], solvedCount: 0 }; 
-            let isSaving = false;
-            let autoUpdateInterval;
-            let countdownInterval;
+        // Configuração de acesso
+        const firebaseConfig = {
+            apiKey: "AIzaSyCLtYecb_VeHuqNUiqkDwIoQQP_3HuW2vg",
+            authDomain: "jmsbr-81be4.firebaseapp.com",
+            projectId: "jmsbr-81be4",
+            storageBucket: "jmsbr-81be4.firebasestorage.app",
+            messagingSenderId: "461966861390",
+            appId: "1:461966861390:web:2e8e1a164f99f7719c4f1f",
+            measurementId: "G-HDZPYRKXKF"
+        };
 
-            // --- Elementos UI ---
-            const loadingEl = document.getElementById('initial-loading');
-            const form = document.getElementById('upload-form');
-            const folderInput = document.getElementById('folder-name');
-            const fileInput = document.getElementById('pdf-file-input');
-            const timeInput = document.getElementById('upload-time');
-            const submitButton = document.getElementById('submit-button');
-            const clearDataBtn = document.getElementById('clear-data-btn');
-            const exportBtn = document.getElementById('export-btn');
-            
-            // Listas
-            const pendingFileList = document.getElementById('file-list');
-            const printedFileList = document.getElementById('printed-file-list');
-            const notifiedFileList = document.getElementById('notified-file-list');
-            const expiredFileList = document.getElementById('expired-file-list');
-            const extravioMotoristaList = document.getElementById('extravio-motorista-list');
-            const extravioBaseList = document.getElementById('extravio-base-list');
+        const appId = "jmsbr-81be4";
+        const appInstance = initializeApp(firebaseConfig);
+        const authInstance = getAuth(appInstance);
+        const dbInstance = getFirestore(appInstance);
 
-            // Contadores
-            const pendingCountEl = document.getElementById('pending-count');
-            const printedCountEl = document.getElementById('printed-count');
-            const notifiedCountEl = document.getElementById('notified-count');
-            const expiredCountEl = document.getElementById('expired-count');
-            const extravioMotoristaCountEl = document.getElementById('extravio-motorista-count');
-            const extravioBaseCountEl = document.getElementById('extravio-base-count');
-            const solvedCountEl = document.getElementById('solved-count');
+        // --- Variáveis de DOM ---
+        const fileListEl = document.getElementById('file-list');
+        const printedListEl = document.getElementById('printed-file-list');
+        const notifiedListEl = document.getElementById('notified-file-list');
+        const expiredListEl = document.getElementById('expired-file-list');
+        const extMotListEl = document.getElementById('extravio-motorista-list');
+        const extBaseListEl = document.getElementById('extravio-base-list');
+        const monthFilterEl = document.getElementById('month-filter');
+        const yearFilterEl = document.getElementById('year-filter');
+        const dbStatusEl = document.getElementById('db-status');
+        const loadingScreenEl = document.getElementById('initial-loading');
 
-            // Filtros
-            const monthFilterEl = document.getElementById('month-filter');
-            const yearFilterEl = document.getElementById('year-filter');
-            const resetFilterBtn = document.getElementById('reset-filter-btn');
+        // --- Estado Global ---
+        let acareacoesArray = [];
+        let authenticatedUser = null;
 
-            // Modais
-            const modal = document.getElementById('confirmation-modal');
-            const notificationEl = document.getElementById('notification');
-            const notificationMessageEl = document.getElementById('notification-message');
-            
-            const ALERT_THRESHOLD = 2 * 60 * 60 * 1000; // 2 horas
+        // --- Referências de Caminhos ---
+        const getCollectionPath = () => collection(dbInstance, 'artifacts', appId, 'public', 'data', 'acareacoes');
+        const getStatsDocPath = () => doc(dbInstance, 'artifacts', appId, 'public', 'data', 'counters', 'global_stats');
 
-            // --- Funções Auxiliares ---
-
-            function showNotification(message, isError = false) {
-                notificationMessageEl.textContent = message;
-                notificationEl.classList.remove('hidden', 'bg-red-500', 'bg-amber-500', 'bg-emerald-500', 'bg-sky-500');
-                let colorClass = isError ? 'bg-red-500' : 'bg-emerald-500';
-                if (!isError && message.includes("Atenção")) colorClass = 'bg-amber-500';
-                notificationEl.classList.add(colorClass); 
-                notificationEl.classList.remove('hidden');
-                setTimeout(() => notificationEl.classList.add('hidden'), 4000);
-            }
-
-            function openConfirmationModal({ title, message }) {
-                const modalTitle = document.getElementById('modal-title');
-                const modalMessage = document.getElementById('modal-message');
-                const confirmBtn = document.getElementById('modal-confirm-btn');
-                const cancelBtn = document.getElementById('modal-cancel-btn');
-                
-                modalTitle.textContent = title;
-                modalMessage.textContent = message;
-                modal.classList.remove('hidden');
-
-                return new Promise((resolve) => {
-                    const confirmHandler = () => {
-                        modal.classList.add('hidden');
-                        confirmBtn.removeEventListener('click', confirmHandler);
-                        cancelBtn.removeEventListener('click', cancelHandler);
-                        resolve(true);
-                    };
-                    const cancelHandler = () => {
-                        modal.classList.add('hidden');
-                        confirmBtn.removeEventListener('click', confirmHandler);
-                        cancelBtn.removeEventListener('click', cancelHandler);
-                        resolve(false);
-                    };
-                    confirmBtn.addEventListener('click', confirmHandler);
-                    cancelBtn.addEventListener('click', cancelHandler);
-                });
-            }
-
-            // --- Lógica de Copiar e Notificar (Sem Modal) ---
-
-            window.copyNotificationAndSetStatus = async function(fileId) {
-                const fileIndex = AppState.files.findIndex(f => f.id === fileId);
-                if(fileIndex === -1) return;
-                
-                const file = AppState.files[fileIndex];
-
-                // Formatar Data/Hora Limite
-                const deadlineDate = new Date(file.deadline);
-                const day = String(deadlineDate.getDate()).padStart(2, '0');
-                const month = String(deadlineDate.getMonth() + 1).padStart(2, '0');
-                const hour = String(deadlineDate.getHours()).padStart(2, '0');
-                const min = String(deadlineDate.getMinutes()).padStart(2, '0');
-
-                // Modelo de Mensagem com Placeholders
-                const message = `Olá «Motorista», boa tarde!
-
-Tudo bem?
-
-Tem alguma atualização sobre a acareação do seguinte pedido?
-
-*1️⃣ Pedido: «ID Pedido» ACAREAÇÃO FÍSICA – «Site no qual a compra foi realizada»*
-
-👤 Destinatário: «Nome do titular da compra» – «Endereço»
-
-📞 «Telefone»
-
-
-*⚠️ Atenção: O prazo da acareação expira hoje (${day}/${month}) às ${hour}:${min}h. Caso não haja resposta, infelizmente será registrado como extravio em nome do motorista.*
-
-Fico no aguardo.
-
-Obrigada!`;
-
-                // Tentar copiar para a área de transferência
-                try {
-                    // Método Fallback para iframes ou browsers antigos
-                    const textArea = document.createElement("textarea");
-                    textArea.value = message;
-                    textArea.style.position = "fixed";
-                    textArea.style.left = "-9999px";
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    
-                    const successful = document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    
-                    if (!successful) throw new Error('Falha ao copiar comando');
-                    
-                    // Atualizar Estado
-                    file.status = 'driver_notified';
-                    file.notificationData = {
-                        driverName: 'Pendente', 
-                        notifiedAt: new Date().getTime()
-                    };
-
-                    await saveData(AppState);
-                    render(AppState);
-                    showNotification("Mensagem copiada e status atualizado!", false);
-
-                } catch (err) {
-                    console.error('Erro ao copiar', err);
-                    showNotification("Erro ao copiar mensagem. Tente novamente.", true);
-                }
-            }
-
-
-            // --- EXPORTAR EXCEL/CSV (NOVO) ---
-            exportBtn.addEventListener('click', () => {
-                if (!AppState.files || AppState.files.length === 0) {
-                    showNotification("Não há dados para exportar.", true);
-                    return;
-                }
-
-                // Cabeçalho CSV
-                const headers = [
-                    "ID do Arquivo",
-                    "Nome do Arquivo",
-                    "Pasta (Data Envio)",
-                    "Data/Hora Envio",
-                    "Prazo Limite",
-                    "Status Atual",
-                    "Motorista Notificado",
-                    "Data da Notificação",
-                ];
-
-                // Mapeamento de Status
-                const statusMap = {
-                    'pending': 'Pendente',
-                    'impresso': 'Impresso',
-                    'driver_notified': 'Motorista Notificado',
-                    'expired': 'Vencido',
-                    'extravio_motorista': 'Extravio Motorista',
-                    'extravio_base': 'Extravio Base'
-                };
-
-                // Gerar Linhas
-                const rows = AppState.files.map(file => {
-                    const notify = file.notificationData || {};
-                    
-                    const uploadDate = file.uploadDate ? new Date(file.uploadDate).toLocaleString('pt-BR') : '';
-                    const deadline = file.deadline ? new Date(file.deadline).toLocaleString('pt-BR') : '';
-                    const notifiedAt = notify.notifiedAt ? new Date(notify.notifiedAt).toLocaleString('pt-BR') : '';
-
-                    const escape = (text) => `"${(text || '').toString().replace(/"/g, '""')}"`;
-
-                    return [
-                        escape(file.id),
-                        escape(file.fileName),
-                        escape(file.folderName),
-                        escape(uploadDate),
-                        escape(deadline),
-                        escape(statusMap[file.status] || file.status),
-                        escape(notify.driverName),
-                        escape(notifiedAt),
-                    ].join(';'); 
-                });
-
-                const csvContent = "\uFEFF" + headers.join(';') + "\n" + rows.join('\n');
-                
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                const timestamp = new Date().toISOString().slice(0,19).replace(/:/g,"-");
-                
-                link.setAttribute("href", url);
-                link.setAttribute("download", `Relatorio_Acareacoes_${timestamp}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
-
-
-            // --- Dados e API ---
-
-            async function getLatestData() {
-                try {
-                    const response = await fetch(`${DATABASE_URL}?_=${new Date().getTime()}`);
-                    if (!response.ok) throw new Error("Erro na rede");
-                    const data = await response.json();
-                    if (!data.files) data.files = [];
-                    return data;
-                } catch (error) {
-                    console.error("Erro ao buscar dados", error);
-                    return null;
-                }
-            }
-            
-            async function saveData(dataToSave) {
-                if (isSaving) return false;
-                isSaving = true;
-                clearInterval(autoUpdateInterval);
-                try {
-                    const response = await fetch(DATABASE_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(dataToSave)
-                    });
-                    return response.ok;
-                } catch (error) {
-                    showNotification("Erro ao salvar.", true);
-                    return false;
-                } finally {
-                    isSaving = false;
-                    startAutoUpdate();
-                }
-            }
-
-            // --- Renderização ---
-
-            function render(data) {
-                const now = new Date().getTime();
-                if (!data) data = { files: [], solvedCount: 0 };
-
-                const monthFilter = monthFilterEl.value;
-                const yearFilter = yearFilterEl.value;
-
-                const filteredFiles = data.files.filter(file => {
-                    if (!file.uploadDate) return false;
-                    const fileDate = new Date(file.uploadDate);
-                    const fileYear = fileDate.getFullYear();
-                    const fileMonth = fileDate.getMonth();
-                    
-                    const yearMatch = (yearFilter === 'all') || (fileYear === parseInt(yearFilter));
-                    const monthMatch = (monthFilter === 'all') || (fileMonth === parseInt(monthFilter));
-                    return yearMatch && monthMatch;
-                });
-
-                pendingFileList.innerHTML = '';
-                printedFileList.innerHTML = '';
-                notifiedFileList.innerHTML = ''; 
-                expiredFileList.innerHTML = '';
-                extravioMotoristaList.innerHTML = '';
-                extravioBaseList.innerHTML = '';
-
-                const pendingFiles = [];
-                const printedFiles = [];
-                const notifiedFiles = []; 
-                const expiredFiles = [];
-                const extMotFiles = [];
-                const extBaseFiles = [];
-
-                let needsUpdate = false;
-
-                filteredFiles.forEach(file => {
-                    if ((file.status === 'pending' || file.status === 'impresso' || file.status === 'driver_notified') && now > file.deadline) {
-                        file.status = 'expired';
-                        needsUpdate = true;
+        // --- Autenticação ---
+        const startupAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        await signInWithCustomToken(authInstance, __initial_auth_token);
+                    } catch (e) {
+                        await signInAnonymously(authInstance);
                     }
-
-                    if (file.status === 'pending') pendingFiles.push(file);
-                    else if (file.status === 'impresso') printedFiles.push(file);
-                    else if (file.status === 'driver_notified') notifiedFiles.push(file);
-                    else if (file.status === 'expired') expiredFiles.push(file);
-                    else if (file.status === 'extravio_motorista') extMotFiles.push(file);
-                    else if (file.status === 'extravio_base') extBaseFiles.push(file);
-                });
-
-                const sortByDeadline = (a, b) => a.deadline - b.deadline;
-                pendingFiles.sort(sortByDeadline);
-                printedFiles.sort(sortByDeadline);
-                notifiedFiles.sort(sortByDeadline);
-                
-                // PENDENTES
-                if(pendingFiles.length === 0) pendingFileList.innerHTML = `<tr id="empty-state-pending"><td colspan="6" class="text-center py-10 text-slate-500">Nenhum documento pendente.</td></tr>`;
-                else pendingFiles.forEach(f => pendingFileList.insertAdjacentHTML('beforeend', createPendingRow(f)));
-
-                // IMPRESSOS
-                if(printedFiles.length === 0) printedFileList.innerHTML = `<tr id="empty-state-printed"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum documento impresso.</td></tr>`;
-                else printedFiles.forEach(f => printedFileList.insertAdjacentHTML('beforeend', createPrintedRow(f)));
-
-                // NOTIFICADOS
-                if(notifiedFiles.length === 0) notifiedFileList.innerHTML = `<tr id="empty-state-notified"><td colspan="5" class="text-center py-10 text-slate-500">Nenhum motorista notificado.</td></tr>`;
-                else notifiedFiles.forEach(f => notifiedFileList.insertAdjacentHTML('beforeend', createNotifiedRow(f)));
-
-                // VENCIDOS
-                if(expiredFiles.length === 0) expiredFileList.innerHTML = `<tr id="empty-state-expired"><td colspan="6" class="text-center py-10 text-slate-500">Nenhum documento vencido.</td></tr>`;
-                else expiredFiles.forEach(f => expiredFileList.insertAdjacentHTML('beforeend', createExpiredRow(f)));
-
-                // EXTRAVIOS
-                if(extMotFiles.length === 0) extravioMotoristaList.innerHTML = `<tr id="empty-state-extravio-motorista"><td colspan="3" class="text-center py-10 text-slate-500">Vazio.</td></tr>`;
-                else extMotFiles.forEach(f => extravioMotoristaList.insertAdjacentHTML('beforeend', createSimpleRow(f, 'orange')));
-
-                if(extBaseFiles.length === 0) extravioBaseList.innerHTML = `<tr id="empty-state-extravio-base"><td colspan="3" class="text-center py-10 text-slate-500">Vazio.</td></tr>`;
-                else extBaseFiles.forEach(f => extravioBaseList.insertAdjacentHTML('beforeend', createSimpleRow(f, 'teal')));
-
-                // Atualizar Contadores
-                pendingCountEl.textContent = pendingFiles.length;
-                printedCountEl.textContent = printedFiles.length;
-                notifiedCountEl.textContent = notifiedFiles.length; 
-                expiredCountEl.textContent = expiredFiles.length;
-                extravioMotoristaCountEl.textContent = extMotFiles.length;
-                extravioBaseCountEl.textContent = extBaseFiles.length;
-                solvedCountEl.textContent = data.solvedCount || 0; 
-
-                if (loadingEl) loadingEl.style.display = 'none';
-                if (needsUpdate) saveData(AppState);
-            }
-
-            // --- Criação de Linhas HTML ---
-
-            function getCountdownCell(deadline) {
-                return `<td class="px-6 py-4">
-                        <span class="countdown-badge px-3 py-1 rounded font-bold text-xs shadow-sm border border-slate-200 block text-center w-24" data-target="${deadline}">Calc...</span>
-                    </td>`;
-            }
-
-            function createPendingRow(file) {
-                const deadlineDate = new Date(file.deadline).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-                return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}" data-deadline="${file.deadline}">
-                    <td class="px-6 py-4 font-medium text-slate-900">${file.fileName}</td>
-                    <td class="px-6 py-4">${file.folderName}</td>
-                    <td class="px-6 py-4 text-xs font-bold text-slate-600">${deadlineDate}</td>
-                    ${getCountdownCell(file.deadline)}
-                    <td class="px-6 py-4"><span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs">Pendente</span></td>
-                    <td class="px-6 py-4 flex justify-center gap-2">
-                        <button class="print-btn text-slate-500 hover:text-green-600" title="Marcar Impresso">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-                        </button>
-                        ${getCommonActions(file.id)}
-                    </td>
-                </tr>`;
-            }
-
-            function createPrintedRow(file) {
-                return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}" data-deadline="${file.deadline}">
-                    <td class="px-6 py-4 font-medium text-slate-900">${file.fileName}</td>
-                    <td class="px-6 py-4">${file.folderName}</td>
-                    ${getCountdownCell(file.deadline)}
-                    <td class="px-6 py-4"><span class="bg-sky-100 text-sky-800 px-2 py-1 rounded-full text-xs">Impresso</span></td>
-                    <td class="px-6 py-4 flex justify-center gap-2">
-                        ${getCommonActions(file.id)}
-                    </td>
-                </tr>`;
-            }
-
-            function createNotifiedRow(file) {
-                const driverName = file.notificationData?.driverName || 'Pendente';
-                const notifiedAt = file.notificationData?.notifiedAt 
-                    ? new Date(file.notificationData.notifiedAt).toLocaleString('pt-BR', {hour: '2-digit', minute:'2-digit', day: '2-digit', month: '2-digit'}) 
-                    : '-';
-                
-                return `<tr class="bg-white hover:bg-purple-50 transition-colors" data-id="${file.id}" data-deadline="${file.deadline}">
-                    <td class="px-6 py-4 font-bold text-slate-800">${driverName}</td>
-                    <td class="px-6 py-4 text-xs text-slate-500">${file.fileName}<br>${file.folderName}</td>
-                    <td class="px-6 py-4 text-xs text-purple-700 font-medium">${notifiedAt}</td>
-                    ${getCountdownCell(file.deadline)}
-                    <td class="px-6 py-4 flex justify-center gap-2">
-                        ${getCommonActions(file.id)}
-                    </td>
-                </tr>`;
-            }
-
-            function createExpiredRow(file) {
-                const date = new Date(file.uploadDate).toLocaleDateString('pt-BR');
-                return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}" data-deadline="${file.deadline}">
-                    <td class="px-6 py-4 font-medium text-slate-900">${file.fileName}</td>
-                    <td class="px-6 py-4">${file.folderName}</td>
-                    <td class="px-6 py-4">${date}</td>
-                    ${getCountdownCell(file.deadline)}
-                    <td class="px-6 py-4"><span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Vencido</span></td>
-                    <td class="px-6 py-4 flex justify-center gap-2">${getCommonActions(file.id)}</td>
-                </tr>`;
-            }
-
-            function createSimpleRow(file, color) {
-                const date = new Date(file.uploadDate).toLocaleDateString('pt-BR');
-                const badgeColor = color === 'orange' ? 'bg-orange-100 text-orange-800' : 'bg-teal-100 text-teal-800';
-                return `<tr class="bg-white hover:bg-slate-50" data-id="${file.id}">
-                    <td class="px-4 py-3 font-medium text-slate-900 text-xs truncate max-w-xs" title="${file.fileName}">${file.fileName}</td>
-                    <td class="px-4 py-3 text-xs">${date}</td>
-                    <td class="px-4 py-3 flex justify-center gap-2">${getCommonActions(file.id)}</td>
-                </tr>`;
-            }
-
-            function getCommonActions(fileId) {
-                return `
-                <!-- Notificar Motorista (Automático - Copia Mensagem) -->
-                <button onclick="copyNotificationAndSetStatus('${fileId}')" title="Copiar Msg e Notificar" class="text-purple-500 hover:text-purple-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>
-                </button>
-                <button title="Baixar" class="download-btn text-slate-400 hover:text-blue-600">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                </button>
-                <button title="Extravio Motorista" class="extravio-mot-btn text-slate-400 hover:text-orange-600">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                </button>
-                <button title="Extravio Base" class="extravio-base-btn text-slate-400 hover:text-teal-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                </button>
-                <button title="Visualizar" class="view-btn text-slate-400 hover:text-indigo-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.018 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
-                </button>
-                <button title="Solucionar" class="delete-btn text-slate-400 hover:text-emerald-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-                </button>`;
-            }
-
-            // --- Gerenciador de Eventos (Botões das Listas) ---
-            document.body.addEventListener('click', async (event) => {
-                const button = event.target.closest('button');
-                if (!button) return;
-                const row = button.closest('tr');
-                if (!row || !row.dataset.id) return;
-                const fileId = row.dataset.id;
-                
-                // Funções que não alteram BD
-                if (button.classList.contains('view-btn')) {
-                    const file = AppState.files.find(f => f.id === fileId);
-                    if(file) {
-                         const win = window.open();
-                         win.document.write(`<iframe src="${file.fileURL}" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
-                    }
-                    return;
+                } else {
+                    await signInAnonymously(authInstance);
                 }
-                
-                // Função Download
-                if (button.classList.contains('download-btn')) {
-                    const file = AppState.files.find(f => f.id === fileId);
-                    if(file) {
-                        const link = document.createElement('a');
-                        link.href = file.fileURL;
-                        link.download = file.fileName;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    }
-                    return;
-                }
-
-                // Funções que alteram BD
-                let needsSave = false;
-                let msg = '';
-                const fileIndex = AppState.files.findIndex(f => f.id === fileId);
-                if (fileIndex === -1) return;
-
-                if (button.classList.contains('print-btn')) {
-                    AppState.files[fileIndex].status = 'impresso';
-                    needsSave = true; msg = 'Marcado como impresso.';
-                } 
-                else if (button.classList.contains('delete-btn')) {
-                    if(await openConfirmationModal({title: 'Solucionar', message: 'Marcar como resolvido e remover da lista?'})) {
-                        AppState.files.splice(fileIndex, 1);
-                        AppState.solvedCount++;
-                        needsSave = true; msg = 'Solucionado!';
-                    }
-                }
-                else if (button.classList.contains('extravio-mot-btn')) {
-                    if(await openConfirmationModal({title: 'Confirmar Extravio Motorista', message: 'Mover para lista de Extravio Motorista?'})) {
-                         AppState.files[fileIndex].status = 'extravio_motorista';
-                         needsSave = true; msg = 'Movido para Extravio Motorista.';
-                    }
-                }
-                else if (button.classList.contains('extravio-base-btn')) {
-                    if(await openConfirmationModal({title: 'Confirmar Extravio Base', message: 'Mover para lista de Extravio Base?'})) {
-                         AppState.files[fileIndex].status = 'extravio_base';
-                         needsSave = true; msg = 'Movido para Extravio Base.';
-                    }
-                }
-
-                if (needsSave) {
-                    await saveData(AppState);
-                    render(AppState);
-                    showNotification(msg);
-                }
-            });
-
-            // --- Lógica do Cronômetro ---
-            setInterval(() => {
-                // SELECIONA TODAS AS LINHAS QUE TÊM CRONÔMETRO AGORA
-                const badges = document.querySelectorAll('.countdown-badge');
-                const now = new Date().getTime();
-
-                badges.forEach(badge => {
-                    const deadline = parseInt(badge.dataset.target);
-                    if(!deadline) return;
-
-                    const diff = deadline - now;
-                    
-                    if (diff <= 0) {
-                        badge.textContent = "EXPIRADO";
-                        badge.className = "countdown-badge px-3 py-1 rounded font-bold text-xs shadow-sm w-24 text-center bg-red-600 text-white pulse-red";
-                    } else {
-                        // Formatar tempo
-                        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                        const s = Math.floor((diff % (1000 * 60)) / 1000);
-                        badge.textContent = `${h}h ${m}m ${s}s`;
-
-                        const hoursLeft = diff / (1000 * 60 * 60);
-                        
-                        if (hoursLeft > 4) {
-                            badge.className = "countdown-badge px-3 py-1 rounded font-bold text-xs shadow-sm w-24 text-center bg-emerald-100 text-emerald-800 border border-emerald-300";
-                        } else if (hoursLeft > 0.5) {
-                            badge.className = "countdown-badge px-3 py-1 rounded font-bold text-xs shadow-sm w-24 text-center bg-amber-100 text-amber-800 border border-amber-300";
-                        } else {
-                            badge.className = "countdown-badge px-3 py-1 rounded font-bold text-xs shadow-sm w-24 text-center bg-red-100 text-red-800 border border-red-300 font-extrabold";
-                        }
-                    }
-                });
-            }, 1000);
-
-            // --- Submissão de Arquivos ---
-            form.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                submitButton.disabled = true;
-                document.getElementById('submit-spinner').classList.remove('hidden');
-                document.getElementById('submit-text').textContent = 'Enviando...';
-
-                const folderName = folderInput.value;
-                const uploadTime = timeInput.value;
-                const files = fileInput.files;
-
-                if (!folderName || !uploadTime || files.length === 0) {
-                    alert("Preencha tudo.");
-                    submitButton.disabled = false; return;
-                }
-
-                // Prazo de 24h
-                const uploadTimestamp = new Date(`${folderName}T${uploadTime}`).getTime();
-                const deadlineTimestamp = uploadTimestamp + (24 * 60 * 60 * 1000);
-
-                const newFiles = [];
-                for(let file of files) {
-                    const reader = new FileReader();
-                    const p = new Promise(resolve => {
-                        reader.onload = e => resolve({
-                            id: crypto.randomUUID(),
-                            fileName: file.name,
-                            folderName: folderName,
-                            uploadDate: uploadTimestamp,
-                            deadline: deadlineTimestamp,
-                            status: 'pending',
-                            fileURL: e.target.result,
-                            notificationData: null // Campo novo
-                        });
-                        reader.readAsDataURL(file);
-                    });
-                    newFiles.push(await p);
-                }
-
-                const data = await getLatestData();
-                data.files.push(...newFiles);
-                AppState = data;
-                await saveData(AppState);
-                render(AppState);
-                
-                form.reset();
-                submitButton.disabled = false;
-                document.getElementById('submit-spinner').classList.add('hidden');
-                document.getElementById('submit-text').textContent = 'Subir Arquivo(s)';
-                showNotification("Arquivos enviados com sucesso!");
-            });
-
-            // Auto Update e filtros
-            function startAutoUpdate() {
-                 autoUpdateInterval = setInterval(async () => {
-                     if(isSaving) return;
-                     const data = await getLatestData();
-                     if(JSON.stringify(data) !== JSON.stringify(AppState)) {
-                         AppState = data;
-                         render(AppState);
-                     }
-                 }, 15000);
+            } catch (err) {
+                console.error("Erro Crítico de Autenticação:", err);
+                dbStatusEl.textContent = "Erro de Acesso";
+                dbStatusEl.className = "text-red-600 font-bold";
             }
+        };
 
-            // Setup filtros de Ano
-            function setupYearFilter() {
-                 const currentYear = new Date().getFullYear();
-                 yearFilterEl.innerHTML = '<option value="all">Todos</option>';
-                 yearFilterEl.add(new Option(currentYear, currentYear));
-                 yearFilterEl.add(new Option(currentYear+1, currentYear+1));
-                 yearFilterEl.value = currentYear;
+        onAuthStateChanged(authInstance, (user) => {
+            authenticatedUser = user;
+            if (user) {
+                dbStatusEl.textContent = "Ligado";
+                dbStatusEl.className = "text-emerald-600 font-bold italic";
+                initRealtimeListeners();
+                initStatsListener();
             }
-
-            monthFilterEl.addEventListener('change', () => render(AppState));
-            yearFilterEl.addEventListener('change', () => render(AppState));
-            resetFilterBtn.addEventListener('click', () => {
-                monthFilterEl.value = new Date().getMonth();
-                yearFilterEl.value = new Date().getFullYear();
-                render(AppState);
-            });
-            clearDataBtn.addEventListener('click', async () => {
-                if(await openConfirmationModal({title:'Resetar', message:'Apagar TUDO?'})) {
-                    AppState = {files:[], solvedCount:0};
-                    await saveData(AppState);
-                    render(AppState);
-                }
-            });
-
-            // Inicializar
-            setupYearFilter();
-            getLatestData().then(data => {
-                AppState = data || {files:[], solvedCount:0};
-                monthFilterEl.value = new Date().getMonth();
-                render(AppState);
-                startAutoUpdate();
-            });
         });
+
+        // --- Sincronização em Tempo Real ---
+        const initRealtimeListeners = () => {
+            if (!authenticatedUser) return;
+            onSnapshot(query(getCollectionPath()), (snapshot) => {
+                acareacoesArray = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+                renderUI();
+                loadingScreenEl.style.display = 'none';
+            }, (err) => {
+                console.error("Firestore sync error:", err);
+                showNotification("Erro na sincronização de dados.", true);
+            });
+        };
+
+        const initStatsListener = () => {
+            onSnapshot(getStatsDocPath(), (snapshot) => {
+                const totalSolved = snapshot.exists() ? snapshot.data().solvedCount : 0;
+                document.getElementById('solved-count').textContent = totalSolved;
+            }, (err) => console.warn("Erro ao ler estatísticas:", err));
+        };
+
+        // --- Lógica de Ação ---
+        window.changeFileStatus = async (id, newStatus) => {
+            if (!authenticatedUser) return;
+            try {
+                const docRef = doc(getCollectionPath(), id);
+                let updateData = { status: newStatus };
+                
+                if (newStatus === 'driver_notified') {
+                    updateData.notificationData = {
+                        notifiedAt: Date.now(),
+                        label: 'Mot. Notificado'
+                    };
+                }
+                
+                await updateDoc(docRef, updateData);
+                showNotification("Estado atualizado!");
+            } catch (e) {
+                showNotification("Erro ao atualizar estado.", true);
+            }
+        };
+
+        window.finishAcareacao = async (id) => {
+            if (!authenticatedUser) return;
+            if (await openConfirmationModal({ title: 'Marcar Solucionado', message: 'Deseja remover este item da lista e arquivar como solucionado?' })) {
+                try {
+                    await deleteDoc(doc(getCollectionPath(), id));
+                    
+                    // Incremento Atómico das Estatísticas
+                    await runTransaction(dbInstance, async (t) => {
+                        const sDoc = await t.get(getStatsDocPath());
+                        const count = (sDoc.exists() ? sDoc.data().solvedCount : 0) + 1;
+                        t.set(getStatsDocPath(), { solvedCount: count }, { merge: true });
+                    });
+                    showNotification("Item arquivado!");
+                } catch (e) {
+                    showNotification("Erro ao processar solução.", true);
+                }
+            }
+        };
+
+        window.copyWhatsAppMsg = (id) => {
+            const entry = acareacoesArray.find(a => a.id === id);
+            if (!entry) return;
+            
+            const deadline = new Date(entry.deadline);
+            const msg = `Olá *Motorista*, bom tarde! Alguma novidade sobre a acareação do pedido ${entry.fileName.split('.')[0]}? O prazo termina hoje em ${deadline.toLocaleDateString()} às ${deadline.getHours()}:${String(deadline.getMinutes()).padStart(2,'0')}h. Obrigado.`;
+            
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = msg;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            
+            showNotification("Texto copiado para o WhatsApp!");
+            window.changeFileStatus(id, 'driver_notified');
+        };
+
+        window.viewAcareacaoPDF = (id) => {
+            const entry = acareacoesArray.find(a => a.id === id);
+            if (entry && entry.fileURL) {
+                const viewer = window.open();
+                viewer.document.write(`<iframe src="${entry.fileURL}" style="border:0; width:100%; height:100%;" allowfullscreen></iframe>`);
+            }
+        };
+
+        // --- Renderização Dinâmica ---
+        function renderUI() {
+            const nowTs = Date.now();
+            const mFilter = monthFilterEl.value;
+            const yFilter = yearFilterEl.value;
+
+            // Limpeza inicial
+            [fileListEl, printedListEl, notifiedListEl, expiredListEl, extMotListEl, extBaseListEl].forEach(list => list.innerHTML = '');
+
+            const groups = { pending:[], impresso:[], driver_notified:[], expired:[], extravio_motorista:[], extravio_base:[] };
+            const counters = { pending:0, impresso:0, driver_notified:0, expired:0, extravio_motorista:0, extravio_base:0 };
+
+            acareacoesArray.forEach(item => {
+                const dateRef = new Date(item.uploadDate);
+                if (mFilter !== 'all' && dateRef.getMonth() !== parseInt(mFilter)) return;
+                if (yFilter !== 'all' && dateRef.getFullYear() !== parseInt(yFilter)) return;
+
+                let status = item.status;
+                if ((status === 'pending' || status === 'impresso' || status === 'driver_notified') && nowTs > item.deadline) {
+                    status = 'expired';
+                }
+                
+                counters[status]++;
+                if (groups[status]) groups[status].push(item);
+            });
+
+            // Gerar linhas
+            const buildRow = (item, status) => {
+                const deadlineLabel = new Date(item.deadline).toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+                const countdownHtml = `<span class="countdown-badge font-bold px-2 py-1 rounded text-xs" data-target="${item.deadline}">...</span>`;
+                
+                const actionsHtml = `
+                    <div class="flex justify-center items-center gap-3">
+                        ${status === 'pending' ? `<button onclick="changeFileStatus('${item.id}','impresso')" class="text-sky-600 font-bold hover:underline">IMPR</button>` : ''}
+                        <button onclick="copyWhatsAppMsg('${item.id}')" class="text-emerald-500 hover:scale-110"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg></button>
+                        <button onclick="viewAcareacaoPDF('${item.id}')" class="text-indigo-400 hover:scale-110"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.018 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg></button>
+                        <button onclick="finishAcareacao('${item.id}')" class="text-emerald-600 font-black hover:scale-125">✓</button>
+                        <button onclick="changeFileStatus('${item.id}','extravio_motorista')" class="text-orange-500 font-bold hover:underline">M</button>
+                        <button onclick="changeFileStatus('${item.id}','extravio_base')" class="text-teal-500 font-bold hover:underline">B</button>
+                    </div>`;
+
+                if (status === 'driver_notified') {
+                    const notifyTime = item.notificationData?.notifiedAt ? new Date(item.notificationData.notifiedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '-';
+                    return `<tr>
+                        <td class="px-6 py-4 font-bold text-slate-800 italic">Notificado às ${notifyTime}</td>
+                        <td class="px-6 py-4 text-xs font-medium">${item.fileName}<br><span class="text-slate-400 font-normal">${item.folderName}</span></td>
+                        <td class="px-6 py-4 text-center">${countdownHtml}</td>
+                        <td class="px-6 py-4 text-center">${actionsHtml}</td>
+                    </tr>`;
+                }
+
+                return `<tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-bold text-slate-700 truncate max-w-[200px]">${item.fileName}</td>
+                    <td class="px-6 py-4 text-slate-400 text-xs">${item.folderName}</td>
+                    <td class="px-6 py-4 text-slate-500 font-bold text-xs">${deadlineLabel}</td>
+                    <td class="px-6 py-4">${countdownHtml}</td>
+                    <td class="px-6 py-4 text-center">${actionsHtml}</td>
+                </tr>`;
+            };
+
+            const simpleRow = (item) => `<tr class="border-b"><td class="p-3 truncate max-w-[150px] font-medium text-slate-500">${item.fileName}</td><td class="p-3 text-center flex justify-center gap-4">
+                <button onclick="viewAcareacaoPDF('${item.id}')" class="text-indigo-400">VER</button>
+                <button onclick="finishAcareacao('${item.id}')" class="text-emerald-500 font-bold">OK</button>
+            </td></tr>`;
+
+            groups.pending.forEach(i => fileListEl.insertAdjacentHTML('beforeend', buildRow(i, 'pending')));
+            groups.impresso.forEach(i => printedListEl.insertAdjacentHTML('beforeend', buildRow(i, 'impresso')));
+            groups.driver_notified.forEach(i => notifiedListEl.insertAdjacentHTML('beforeend', buildRow(i, 'driver_notified')));
+            groups.expired.forEach(i => expiredListEl.insertAdjacentHTML('beforeend', buildRow(i, 'expired')));
+            groups.extravio_motorista.forEach(i => extMotListEl.insertAdjacentHTML('beforeend', simpleRow(i)));
+            groups.extravio_base.forEach(i => extBaseListEl.insertAdjacentHTML('beforeend', simpleRow(i)));
+
+            Object.keys(counters).forEach(key => {
+                const cEl = document.getElementById(`${key.replace('_','-')}-count`);
+                if (cEl) cEl.textContent = counters[key];
+            });
+
+            [fileListEl, printedListEl, notifiedListEl, expiredListEl].forEach(list => {
+                if (list.innerHTML === '') list.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-slate-300 italic text-xs uppercase tracking-widest">Sem documentos ativos</td></tr>';
+            });
+        }
+
+        // --- Cronómetro Global ---
+        setInterval(() => {
+            document.querySelectorAll('.countdown-badge').forEach(badge => {
+                const target = parseInt(badge.dataset.target);
+                const diff = target - Date.now();
+                if (diff <= 0) {
+                    badge.textContent = "EXPIRADO"; 
+                    badge.className = "countdown-badge bg-red-600 text-white px-2 py-0.5 rounded text-[10px] animate-pulse font-black";
+                } else {
+                    const h = Math.floor(diff / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    badge.textContent = `${h}h ${m}m ${s}s`;
+                    badge.className = h < 4 ? "countdown-badge bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-bold" : "countdown-badge bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded text-xs font-bold";
+                }
+            });
+        }, 1000);
+
+        // --- Upload ---
+        document.getElementById('upload-form').onsubmit = async (e) => {
+            e.preventDefault();
+            if (!authenticatedUser) return;
+            const folder = document.getElementById('folder-name').value;
+            const time = document.getElementById('upload-time').value;
+            const files = document.getElementById('pdf-file-input').files;
+            const btn = document.getElementById('submit-button');
+            const spinner = document.getElementById('submit-spinner');
+            const txt = document.getElementById('submit-text');
+
+            btn.disabled = true; spinner.classList.remove('hidden'); txt.textContent = "A sincronizar...";
+
+            const tsStart = new Date(`${folder}T${time}`).getTime();
+            const tsDeadline = tsStart + (24 * 60 * 60 * 1000);
+
+            try {
+                for (let f of files) {
+                    const reader = new FileReader();
+                    await new Promise(resolve => {
+                        reader.onload = async (ev) => {
+                            await addDoc(getCollectionPath(), {
+                                fileName: f.name, folderName: folder, uploadDate: tsStart,
+                                deadline: tsDeadline, status: 'pending', fileURL: ev.target.result,
+                                createdAt: Date.now()
+                            });
+                            resolve();
+                        };
+                        reader.readAsDataURL(f);
+                    });
+                }
+                showNotification(`${files.length} documento(s) carregado(s)!`);
+                document.getElementById('upload-form').reset();
+            } catch (err) {
+                showNotification("Erro no upload.", true);
+            } finally {
+                btn.disabled = false; spinner.classList.add('hidden'); txt.textContent = "Enviar para a Base de Dados Cloud";
+            }
+        };
+
+        // --- Auxiliares ---
+        function showNotification(msg, isErr = false) {
+            const el = document.getElementById('notification');
+            document.getElementById('notification-message').textContent = msg;
+            el.classList.remove('hidden', 'bg-emerald-600', 'bg-red-600');
+            el.classList.add(isErr ? 'bg-red-600' : 'bg-emerald-600');
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 3000);
+        }
+
+        function openConfirmationModal({ title, message }) {
+            const m = document.getElementById('confirmation-modal');
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            m.classList.remove('hidden');
+            return new Promise(resolve => {
+                document.getElementById('modal-confirm-btn').onclick = () => { m.classList.add('hidden'); resolve(true); };
+                document.getElementById('modal-cancel-btn').onclick = () => { m.classList.add('hidden'); resolve(false); };
+            });
+        }
+
+        document.getElementById('clear-data-btn').onclick = async () => {
+            if (await openConfirmationModal({ title: 'Atenção Crítica', message: 'Deseja apagar TODOS os documentos permanentemente?' })) {
+                acareacoesArray.forEach(async item => { await deleteDoc(doc(getCollectionPath(), item.id)); });
+                showNotification("Limpeza concluída.");
+            }
+        };
+
+        document.getElementById('export-btn').onclick = () => {
+            if (acareacoesArray.length === 0) return showNotification("Sem dados.", true);
+            const csv = "ID;Ficheiro;Pasta;Status;Deadline\n" + acareacoesArray.map(i => `${i.id};${i.fileName};${i.folderName};${i.status};${new Date(i.deadline).toLocaleString()}`).join('\n');
+            const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Acareacoes_JMSBR.csv`; link.click();
+        };
+
+        const setupFilters = () => {
+            const currentY = new Date().getFullYear();
+            yearFilterEl.innerHTML = `<option value="all">Anos</option><option value="${currentY}">${currentY}</option><option value="${currentY-1}">${currentY-1}</option>`;
+            yearFilterEl.value = currentY;
+            monthFilterEl.value = new Date().getMonth();
+            monthFilterEl.onchange = renderUI;
+            yearFilterEl.onchange = renderUI;
+            document.getElementById('reset-filter-btn').onclick = () => { yearFilterEl.value = currentY; monthFilterEl.value = new Date().getMonth(); renderUI(); };
+        };
+
+        setupFilters();
+        startupAuth();
     </script>
 </body>
 </html>
