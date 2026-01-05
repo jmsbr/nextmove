@@ -390,6 +390,21 @@
             }
         };
 
+        // --- Nova Função de Download ---
+        window.downloadFile = (id) => {
+            const entry = acareacoesArray.find(a => a.id === id);
+            if (entry && entry.fileURL) {
+                const link = document.createElement("a");
+                link.href = entry.fileURL;
+                link.download = entry.fileName; // Usa o nome original do arquivo
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                showNotification("Arquivo não disponível", true);
+            }
+        };
+
         // --- Renderização Dinâmica ---
         function renderUI() {
             const nowTs = Date.now();
@@ -424,11 +439,27 @@
                 const actionsHtml = `
                     <div class="flex justify-center items-center gap-3">
                         ${status === 'pending' ? `<button onclick="changeFileStatus('${item.id}','impresso')" class="text-sky-600 font-bold hover:underline">IMPR</button>` : ''}
-                        <button onclick="copyWhatsAppMsg('${item.id}')" class="text-emerald-500 hover:scale-110"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg></button>
-                        <button onclick="viewAcareacaoPDF('${item.id}')" class="text-indigo-400 hover:scale-110"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.018 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg></button>
-                        <button onclick="finishAcareacao('${item.id}')" class="text-emerald-600 font-black hover:scale-125">✓</button>
-                        <button onclick="changeFileStatus('${item.id}','extravio_motorista')" class="text-orange-500 font-bold hover:underline">M</button>
-                        <button onclick="changeFileStatus('${item.id}','extravio_base')" class="text-teal-500 font-bold hover:underline">B</button>
+                        
+                        <!-- Botão WhatsApp -->
+                        <button onclick="copyWhatsAppMsg('${item.id}')" class="text-emerald-500 hover:scale-110" title="Copiar Mensagem WhatsApp">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+                        </button>
+                        
+                        <!-- Botão Download (NOVO) -->
+                        <button onclick="downloadFile('${item.id}')" class="text-slate-600 hover:text-slate-900 hover:scale-110" title="Baixar PDF">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        </button>
+
+                        <!-- Botão Visualizar -->
+                        <button onclick="viewAcareacaoPDF('${item.id}')" class="text-indigo-400 hover:scale-110" title="Visualizar">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.018 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
+                        </button>
+                        
+                        <!-- Botão Finalizar -->
+                        <button onclick="finishAcareacao('${item.id}')" class="text-emerald-600 font-black hover:scale-125" title="Concluir">✓</button>
+                        
+                        <button onclick="changeFileStatus('${item.id}','extravio_motorista')" class="text-orange-500 font-bold hover:underline" title="Extravio Motorista">M</button>
+                        <button onclick="changeFileStatus('${item.id}','extravio_base')" class="text-teal-500 font-bold hover:underline" title="Extravio Base">B</button>
                     </div>`;
 
                 if (status === 'driver_notified') {
@@ -451,6 +482,7 @@
             };
 
             const simpleRow = (item) => `<tr class="border-b"><td class="p-3 break-words font-medium text-slate-500">${item.fileName}</td><td class="p-3 text-center flex justify-center gap-4">
+                <button onclick="downloadFile('${item.id}')" class="text-slate-600 hover:scale-110" title="Baixar"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg></button>
                 <button onclick="viewAcareacaoPDF('${item.id}')" class="text-indigo-400">VER</button>
                 <button onclick="finishAcareacao('${item.id}')" class="text-emerald-500 font-bold">OK</button>
             </td></tr>`;
