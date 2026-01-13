@@ -411,6 +411,11 @@
             const mFilter = monthFilterEl.value;
             const yFilter = yearFilterEl.value;
 
+            // Ordenação: Prazo Limite (deadline) do mais urgente (menor timestamp) para o mais distante
+            acareacoesArray.sort((a, b) => {
+                return a.deadline - b.deadline;
+            });
+
             // Limpeza inicial
             [fileListEl, printedListEl, notifiedListEl, expiredListEl, extMotListEl, extBaseListEl].forEach(list => list.innerHTML = '');
 
